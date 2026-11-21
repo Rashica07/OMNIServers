@@ -9,7 +9,7 @@ apps/mac       SwiftUI Mac app (the reference implementation)
   craftpanel-Swift/craftpanel-Swift/Core     logic: servers, backups, engines, network, launcher link
   craftpanel-Swift/craftpanel-Swift/Views    SwiftUI screens
   craftpanel-Swift/craftpanel-SwiftTests     unit tests (XCTest)
-  scripts/ appcast.xml Branding/             DMG build, update feed, icons
+  scripts/ Branding/                         DMG build, icons
 apps/desktop   Avalonia app for Windows and Linux
   src/CraftPanel.Core        logic (mirrors Mac Core)
   src/CraftPanel.App         Avalonia UI
@@ -50,7 +50,7 @@ Live tests that download or run real engines are off by default. `OMNI_LIVE=1` t
 4. **Be honest in the UI.** Features that cannot work for a server type are hidden, not faked. OMNIHost is labelled experimental.
 5. **Never write credentials** into code, notes, commits or issues. Keys live in the Keychain or environment, never the repo (`.gitignore` blocks `.env`, keystores, updater keys).
 6. **Layout:** fill rows and share space evenly; do not strand one control on one side. On Desktop, copy the Mac layout exactly.
-7. **Links:** the repo is `Rashica07/OMNIServers`. Update feed: `apps/mac/appcast.xml` (raw URL set in the Xcode project as `SUFeedURL`). Site files point at GitHub Releases of this repo.
+7. **Links:** the repo is `Rashica07/OMNIServers`. Updates: both apps read GitHub Releases of this repo (Mac `Core/UpdateChecker.swift`, tags `swift-v*`; Desktop `Updates/AppUpdater.cs`, tags `windows-v*`); there is no appcast or Sparkle. Site files point at GitHub Releases of this repo.
 
 ## Common tasks
 
@@ -62,7 +62,7 @@ Live tests that download or run real engines are off by default. `OMNI_LIVE=1` t
 | Add or change a screen | `Views/`, then mirror it in `apps/desktop/src/CraftPanel.App` |
 | Backups, snapshots, retention | `BackupManager.swift`, `SnapshotManager.swift`, `Retention.swift` |
 | Colours, spacing | `Core/CPTheme.swift`, `docs/DESIGN_TOKENS.md` |
-| Release a Mac build | `apps/mac/scripts/make-dmgs.sh`, then update `appcast.xml`; tag `swift-v<version>` |
+| Release a Mac build | `apps/mac/scripts/make-dmgs.sh`, then `gh release create swift-v<version>` with the two DMGs. Installs older than 3.2.0 read the old `Rashica07/craftpanel` repo, so mirror each release there too until they have died out |
 | Release Desktop | `apps/desktop/scripts/build-windows.sh` / `build-linux.sh`; tag `windows-v<version>` |
 | Edit the website | `site/*.html`; `site/CNAME` holds the domain |
 
