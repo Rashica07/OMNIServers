@@ -21,10 +21,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// One ProcessManager for the whole app — the Swift equivalent of the
     /// single `ProcessManager` living in Tauri state.
     let processes = ProcessManager()
+    nonisolated(unsafe) static weak var shared: AppDelegate?
 
     func applicationWillFinishLaunching(_ notification: Notification) {
         signal(SIGPIPE, SIG_IGN)
+        AppDelegate.shared = self
         if !isRunningUnitTests { UNUserNotificationCenter.current().delegate = NotificationRouter.shared }
+    }
+
+    /// An update chosen with "When I quit" goes in once this process is gone.
+    func applicationWillTerminate(_ notification: Notification) {
+        if isRunningUnitTests { return }
+        MainActor.assumeIsolated { UpdateFlow.shared.applyOnQuit() }
     }
 
     /// Graceful shutdown: send `stop` to every running server, wait for

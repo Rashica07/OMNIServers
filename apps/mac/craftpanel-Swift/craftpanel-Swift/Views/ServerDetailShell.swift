@@ -264,13 +264,17 @@ struct ServerDetailShell: View {
                         }
                         .buttonStyle(.plain).help("Copy the address")
                         headerLink("Play") {
-                            if !server.serverType.isBedrock, OMNILauncherLink.canPlay(minecraft: server.mcVersion),
-                               OMNILauncherLink.play(name: server.name, address: localAddress, publicAddress: publicAddress, minecraft: server.mcVersion ?? "") {
-                                return
+                            Task {
+                                // Java servers go through OMNI Launcher; it is downloaded first when it isn't installed.
+                                if !server.serverType.isBedrock, !(server.mcVersion ?? "").isEmpty { _ = await UpdateFlow.shared.ensureLauncher() }
+                                if !server.serverType.isBedrock, OMNILauncherLink.canPlay(minecraft: server.mcVersion),
+                                   OMNILauncherLink.play(name: server.name, address: localAddress, publicAddress: publicAddress, minecraft: server.mcVersion ?? "") {
+                                    return
+                                }
+                                let plan = JoinLink.plan(isBedrock: server.serverType.isBedrock, name: server.name, address: localAddress)
+                                if !plan.bedrock { copyToPasteboard(plan.address); Toasts.shared.show("Open Minecraft and join", detail: "Paste the address under Multiplayer", symbol: "gamecontroller.fill") }
+                                _ = JoinLink.open(plan)
                             }
-                            let plan = JoinLink.plan(isBedrock: server.serverType.isBedrock, name: server.name, address: localAddress)
-                            if !plan.bedrock { copyToPasteboard(plan.address); Toasts.shared.show("Open Minecraft and join", detail: "Paste the address under Multiplayer", symbol: "gamecontroller.fill") }
-                            _ = JoinLink.open(plan)
                         }
                     }
                 }

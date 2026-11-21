@@ -101,18 +101,13 @@ public partial class App : Application
         SetupTray();
         PlayerNotifier.Background = (title, sub, id) => BackgroundToast.Show(title, sub, () => Dispatcher.UIThread.Post(() => { ShowMain(); if (_main?.DataContext is MainViewModel vm) vm.Open(id, ServerSection.Chat); }));
         if (Environment.ProcessPath is { } self) CraftPanel.Core.Updates.AppUpdater.CleanUp(self);
-        if (AppServices.Settings.AutoCheckUpdates) _ = CheckForUpdateQuietlyAsync();
+        _desktop.Exit += (_, _) => Services.UpdateFlow.ApplyOnQuit();   // an update chosen with "When I quit" goes in as the app closes
+        if (AppServices.Settings.AutoCheckUpdates) _ = Services.UpdateFlow.OfferOnLaunchAsync(CraftPanel.App.ViewModels.AppSettingsViewModel.CurrentVersion);
         AppServices.Scheduler.StartAutoStartServers();
         _ = CraftPanel.Core.Power.KeepAwake.ApplyAsync(AppServices.Settings);
         // First launch: offer the tour once (it can always be reopened from Help).
         if (!AppServices.Settings.HelpTourDone && _main.DataContext is MainViewModel mvm) Dispatcher.UIThread.Post(() => mvm.ShowHelp(tour: true), DispatcherPriority.Background);
         if (adopted > 0) ToastService.Shared.Show($"Reconnected to {adopted} running server{(adopted == 1 ? "" : "s")}", "", "link", "ok");
-    }
-
-    static async Task CheckForUpdateQuietlyAsync()
-    {
-        var info = await CraftPanel.Core.Updates.AppUpdater.CheckAsync(CraftPanel.App.ViewModels.AppSettingsViewModel.CurrentVersion);
-        if (info.Newer) ToastService.Shared.Show($"OMNIServers {info.Latest} is available", "Settings → General → Updates installs it", "download", "ok", null, 10);
     }
 
     // ---- window / quit -----------------------------------------------------------------------

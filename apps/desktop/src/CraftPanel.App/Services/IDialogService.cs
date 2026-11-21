@@ -6,6 +6,8 @@ public interface IDialogService
     Task<string?> PickFolderAsync(string title);
     Task<IReadOnlyList<string>> PickFilesAsync(string title, bool multiple = false);
     Task<bool> ConfirmAsync(string title, string message, string confirmText = "OK", bool danger = false);
+    /// <summary>A dialog with several buttons. Returns the index of the one pressed, or -1 if it was closed.</summary>
+    Task<int> ChooseAsync(string title, string message, params string[] buttons);
     Task<string?> PromptAsync(string title, string label, string? initial = null, string confirmText = "OK");
     Task ShowMessageAsync(string title, string message);
     void OpenFolder(string path);

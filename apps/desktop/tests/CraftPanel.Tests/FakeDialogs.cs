@@ -16,6 +16,9 @@ public sealed class FakeDialogs : IDialogService
 
     public Task<bool> ConfirmAsync(string title, string message, string confirmText = "OK", bool danger = false)
     { Asked.Add((title, message)); return Task.FromResult(Confirms.Count > 0 && Confirms.Dequeue()); }
+    public Queue<int> Choices { get; } = new();
+    public Task<int> ChooseAsync(string title, string message, params string[] buttons)
+    { Asked.Add((title, message)); return Task.FromResult(Choices.Count > 0 ? Choices.Dequeue() : -1); }
     public Task<string?> PickFolderAsync(string title) => Task.FromResult(FolderToPick);
     public Task<IReadOnlyList<string>> PickFilesAsync(string title, bool multiple = false) => Task.FromResult<IReadOnlyList<string>>([]);
     public Task<string?> PromptAsync(string title, string label, string? initial = null, string confirmText = "OK") => Task.FromResult<string?>(null);

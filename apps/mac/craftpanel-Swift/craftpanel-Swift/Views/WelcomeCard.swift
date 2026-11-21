@@ -42,12 +42,11 @@ struct WelcomeCard: View {
                 }
             }
             if !busy {
-                Button { OMNILauncherLink.open() } label: {
+                Button { Task { await UpdateFlow.shared.openLauncher() } } label: {
                     Label("Play Minecraft with OMNI Launcher", systemImage: "cube.fill").font(.callout)
                 }
                 .buttonStyle(.plain).foregroundStyle(CPColor.inkDim)
-                .disabled(OMNILauncherLink.installedURL() == nil)
-                .help(OMNILauncherLink.installedURL() == nil ? "OMNI Launcher isn't installed" : "Open OMNI Launcher")
+                .help(OMNILauncherLink.installedURL() == nil ? "Download and install OMNI Launcher" : "Open OMNI Launcher")
             }
             if let errorText { Text(errorText).font(.caption).foregroundStyle(CPColor.bad) }
         }

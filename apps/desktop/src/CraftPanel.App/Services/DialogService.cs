@@ -32,6 +32,29 @@ public sealed class DialogService(Window owner) : IDialogService
         return ok;
     }
 
+    public async Task<int> ChooseAsync(string title, string message, params string[] buttons)
+    {
+        var chosen = -1;
+        var win = new Window { Title = title, SizeToContent = SizeToContent.WidthAndHeight, MinWidth = 400, MaxWidth = 540, CanResize = false, WindowStartupLocation = WindowStartupLocation.CenterOwner, ShowInTaskbar = false };
+        var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 6, 0, 0) };
+        // The first button is the main one, so it sits last (rightmost) and is the accent button; the rest are quiet.
+        for (var i = buttons.Length - 1; i >= 0; i--)
+        {
+            var idx = i;
+            var b = new Button { Content = buttons[i], MinWidth = 84 };
+            b.Classes.Add(i == 0 ? "primary" : "ghost");
+            b.Click += (_, _) => { chosen = idx; win.Close(); };
+            row.Children.Add(b);
+        }
+        var body = new StackPanel { Spacing = 12, Margin = new Thickness(22) };
+        body.Children.Add(new TextBlock { Text = title, Classes = { "h2" }, TextWrapping = TextWrapping.Wrap });
+        body.Children.Add(new TextBlock { Text = message, Classes = { "dim" }, TextWrapping = TextWrapping.Wrap });
+        body.Children.Add(row);
+        win.Content = body;
+        await win.ShowDialog(owner);
+        return chosen;
+    }
+
     public async Task ShowMessageAsync(string title, string message) => await Show(title, message, null, [("OK", "primary", true)], _ => { });
 
     public async Task<string?> PromptAsync(string title, string label, string? initial = null, string confirmText = "OK")

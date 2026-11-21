@@ -76,7 +76,7 @@ public static class OmniLauncherLink
         {
             foreach (var dir in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(':', StringSplitOptions.RemoveEmptyEntries))
                 list.Add(Path.Combine(dir, "omni-launcher"));
-            foreach (var root in new[] { Path.Combine(home, ".local", "bin"), Path.Combine(home, "Applications"), "/opt/omni-launcher", "/usr/local/bin", Path.Combine(home, "omni-launcher") })
+            foreach (var root in new[] { Path.Combine(home, ".local", "opt", "omni-launcher"), Path.Combine(home, ".local", "bin"), Path.Combine(home, "Applications"), "/opt/omni-launcher", "/usr/local/bin", Path.Combine(home, "omni-launcher") })
                 list.Add(Path.Combine(root, "omni-launcher"));
         }
         return list;

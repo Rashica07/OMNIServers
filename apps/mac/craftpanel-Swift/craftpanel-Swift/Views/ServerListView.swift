@@ -231,12 +231,7 @@ struct ServerListView: View {
     }
 
     private func openLauncher() {
-        if !OMNILauncherLink.open() {
-            let alert = NSAlert()
-            alert.messageText = "OMNI Launcher isn't installed"
-            alert.informativeText = "OMNI Launcher is the Minecraft launcher that goes with OMNIServers. Install it in your Applications folder and this button will open it."
-            alert.runModal()
-        }
+        Task { await UpdateFlow.shared.openLauncher() }
     }
 
     private func openHelp() {

@@ -16,8 +16,15 @@ struct UpdateBanner: View {
             }
         }
         .task {
-            guard AppDefaults.autoCheckUpdates else { return }
-            result = await UpdateChecker.check()
+            guard AppDefaults.autoCheckUpdates, !isRunningUnitTests else { return }
+            let r = await UpdateChecker.check()
+            // An installable update gets the alert (update now / when I quit / later). Without a download for this Mac, the banner links to the release.
+            if r.newer, r.downloadURL != nil {
+                try? await Task.sleep(for: .seconds(1.5))
+                await UpdateFlow.shared.offer(r, serversRunning: AppDelegate.shared?.processes.anyRunning ?? false)
+            } else {
+                result = r
+            }
         }
     }
 

@@ -51,7 +51,7 @@ nonisolated enum UpdateInstaller {
     }
 
     /// The shell script that waits for this app to quit, replaces it, and opens the new one.
-    static func swapScript(pid: Int32, staged: URL, target: URL) -> String {
+    static func swapScript(pid: Int32, staged: URL, target: URL, relaunch: Bool = true) -> String {
         func q(_ u: URL) -> String { "'" + u.path.replacingOccurrences(of: "'", with: "'\\''") + "'" }
         let new = staged.appending(path: "OMNIServers.app")
         return """
@@ -60,14 +60,14 @@ nonisolated enum UpdateInstaller {
         rm -rf "$BACKUP"
         mv \(q(target)) "$BACKUP" || exit 1
         if ditto \(q(new)) \(q(target)); then rm -rf "$BACKUP"; else rm -rf \(q(target)); mv "$BACKUP" \(q(target)); fi
-        open \(q(target))
+        \(relaunch ? "open \(q(target))" : "")
         """
     }
 
-    static func swapAndRelaunch(staged: URL, target: URL = Bundle.main.bundleURL) throws {
+    static func swapAndRelaunch(staged: URL, target: URL = Bundle.main.bundleURL, relaunch: Bool = true) throws {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/bin/sh")
-        p.arguments = ["-c", swapScript(pid: ProcessInfo.processInfo.processIdentifier, staged: staged, target: target)]
+        p.arguments = ["-c", swapScript(pid: ProcessInfo.processInfo.processIdentifier, staged: staged, target: target, relaunch: relaunch)]
         p.standardOutput = FileHandle.nullDevice
         p.standardError = FileHandle.nullDevice
         try p.run()

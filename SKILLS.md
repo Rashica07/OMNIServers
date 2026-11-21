@@ -50,7 +50,7 @@ Live tests that download or run real engines are off by default. `OMNI_LIVE=1` t
 4. **Be honest in the UI.** Features that cannot work for a server type are hidden, not faked. OMNIHost is labelled experimental.
 5. **Never write credentials** into code, notes, commits or issues. Keys live in the Keychain or environment, never the repo (`.gitignore` blocks `.env`, keystores, updater keys).
 6. **Layout:** fill rows and share space evenly; do not strand one control on one side. On Desktop, copy the Mac layout exactly.
-7. **Links:** the repo is `Rashica07/OMNIServers`. Updates: both apps read GitHub Releases of this repo (Mac `Core/UpdateChecker.swift`, tags `swift-v*`; Desktop `Updates/AppUpdater.cs`, tags `windows-v*`); there is no appcast or Sparkle. Site files point at GitHub Releases of this repo.
+7. **Links:** the repo is `Rashica07/OMNIServers`. Updates: both apps read GitHub Releases of this repo (Mac `Core/UpdateChecker.swift`, tags `swift-v*`; Desktop `Updates/AppUpdater.cs`, tags `windows-v*` and `linux-v*`); there is no appcast or Sparkle. On launch both apps check and show an alert (update now / when I quit / later); "when I quit" downloads first and swaps the app in as it exits (Mac `Core/UpdateFlow.swift`, Desktop `Services/UpdateFlow.cs`). "Open launcher" and Play download and install OMNI Launcher from `Rashica07/omni-launcher` releases (`omni-launcher-v*`, pre-releases included) when it is missing (Mac `Core/LauncherInstaller.swift`, Desktop `Updates/LauncherInstaller.cs`). Site files point at GitHub Releases of this repo.
 
 ## Common tasks
 

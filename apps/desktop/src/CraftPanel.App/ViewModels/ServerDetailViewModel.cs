@@ -63,9 +63,11 @@ public sealed class ServerDetailViewModel : ViewModelBase
         KillCommand = new RelayCommand(() => Server.Runtime.Kill(), () => Server.IsRunning);
         OpenFolderCommand = new RelayCommand(() => Dialogs.Current.OpenFolder(Server.Record.Path));
         CopyAddressCommand = new RelayCommand(() => { Dialogs.Current.CopyText(Address); ToastService.Shared.Show("Address copied", Address, "copy", "ok", null, 3); });
-        JoinCommand = new RelayCommand(() =>
+        JoinCommand = new AsyncCommand(async () =>
         {
             // Java servers: hand over to OMNI Launcher, which opens straight onto the server.
+            if (!Server.Record.ServerType.IsBedrock() && !string.IsNullOrWhiteSpace(Server.Record.McVersion))
+                await UpdateFlow.EnsureLauncherAsync();   // not installed: offers to download it; installed: offers a newer build once
             if (!Server.Record.ServerType.IsBedrock() && OmniLauncherLink.CanPlay(Server.Record.McVersion))
             {
                 var pub = TunnelManager.Shared.Status(Server.Record.Id) is { Running: true, Address: { Length: > 0 } a } ? a : null;
@@ -108,7 +110,7 @@ public sealed class ServerDetailViewModel : ViewModelBase
 
     public RelayCommand CopyAddressCommand { get; }
     public RelayCommand InviteCommand { get; }
-    public RelayCommand JoinCommand { get; }
+    public AsyncCommand JoinCommand { get; }
 
     /// <summary>The address friends on this network type into Minecraft (the Network tab has tunnel and public options).</summary>
     int ServerPort => Server.Record.ServerType.IsOmniHost() ? OmniHostAdapter.Port(Server.Record.Path) : Properties.Load(Server.Record.Path).GetInt("server-port", Server.Record.ServerType.IsBedrock() ? 19132 : 25565);
