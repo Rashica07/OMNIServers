@@ -14,7 +14,7 @@ for RID in linux-x64 linux-arm64; do
     -p:DebugType=none -p:DebugSymbols=false -o "$STAGE" -v q
   rm -f "$STAGE"/*.pdb(N)
   mv "$STAGE/CraftPanel" "$STAGE/omniservers"; chmod +x "$STAGE/omniservers"
-  cp "$ROOT/LICENSE" "$STAGE/LICENSE"
+  cp "$ROOT/../../LICENSE" "$STAGE/LICENSE"
   cp "$ROOT/docs/README-linux.txt" "$STAGE/README.txt"
   TGZ="$OUT/OMNIServers-$VER-$RID.tar.gz"; rm -f "$TGZ"
   tar -C "$STAGE" -czf "$TGZ" .
