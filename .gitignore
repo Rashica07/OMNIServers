@@ -1,0 +1,22 @@
+.DS_Store
+# build output
+build/
+bin/
+obj/
+dist/
+DerivedData/
+.gradle/
+.build/
+*.xcuserstate
+xcuserdata/
+# secrets and local config: never commit these
+.env
+*.env
+local.properties
+*.keystore
+*.jks
+*.p12
+.updater-key-DO-NOT-COMMIT/
+# bundled JVM blobs from the Android on-device spike (fetched, not stored)
+apps/android/app/src/main/assets/jre*
+apps/android/app/src/main/jniLibs/

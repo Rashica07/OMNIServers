@@ -1,0 +1,128 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.ServerSettingsView"
+             x:DataType="vm:ServerSettingsViewModel">
+  <Grid RowDefinitions="*,Auto">
+    <ScrollViewer>
+      <StackPanel Margin="24,20" Spacing="16" MaxWidth="760" HorizontalAlignment="Center">
+        <Border Classes="banner warn" IsVisible="{Binding Locked}">
+          <StackPanel Orientation="Horizontal" Spacing="9"><c:Icon Kind="alert" Foreground="{DynamicResource Cp.Warn}" /><TextBlock Text="{Binding LockedNote}" /></StackPanel>
+        </Border>
+
+        <c:Card Title="General" Icon="sliders" Description="{Binding TypeLine}">
+          <StackPanel Spacing="14">
+            <c:Field Label="Name"><TextBox Text="{Binding Name, Mode=TwoWay}" /></c:Field>
+            <c:Field Label="Location"><TextBlock Text="{Binding FolderPath}" Classes="mono dim small" TextWrapping="Wrap" /></c:Field>
+            <c:Field Label="Message of the day" Hint="Shown in your friends' server list." IsVisible="{Binding HasProperties}"><TextBox Text="{Binding Motd, Mode=TwoWay}" /></c:Field>
+          </StackPanel>
+        </c:Card>
+
+        <c:Card Title="Memory" Icon="memory" IsVisible="{Binding IsJava}">
+          <c:RamPicker RamMB="{Binding RamMB, Mode=TwoWay}" Kind="{Binding RamKind}" ShowPlayers="True" Follow="False" IsEnabled="{Binding CanEdit}" />
+        </c:Card>
+
+        <c:Card Title="Java" Icon="cpu" IsVisible="{Binding IsJava}" Description="The runtime that launches this server.">
+          <StackPanel Spacing="14">
+            <c:Field Label="Java" Hint="{Binding JavaStatus}">
+              <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
+                <TextBox Classes="mono" Text="{Binding JavaPath, Mode=TwoWay}" IsEnabled="{Binding CanEdit}" />
+                <Button Grid.Column="1" Content="Auto" Classes="ghost" Command="{Binding AutoJavaCommand}" IsEnabled="{Binding CanEdit}" ToolTip.Tip="Let OMNIServers pick a matching Java at start" />
+                <Button Grid.Column="2" Content="Browse…" Classes="ghost" Command="{Binding BrowseJavaCommand}" IsEnabled="{Binding CanEdit}" />
+                <Button Grid.Column="3" Content="Install" Classes="ghost" Command="{Binding InstallJavaCommand}" IsEnabled="{Binding CanEdit}" ToolTip.Tip="Download a verified Eclipse Temurin runtime" />
+              </Grid>
+            </c:Field>
+            <c:Field Label="Extra jvm flags" Hint="Optional. Aikar's flags are a well-known tuning preset for Paper and Fabric.">
+              <StackPanel Spacing="6">
+                <TextBox Classes="mono" Text="{Binding JvmArgs, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="64" IsEnabled="{Binding CanEdit}" FontSize="12" />
+                <Button Content="Use Aikar's flags" Classes="ghost sm" HorizontalAlignment="Left" Command="{Binding AikarCommand}" IsEnabled="{Binding CanEdit}" />
+              </StackPanel>
+            </c:Field>
+            <c:Field Label="Launch command"><SelectableTextBlock Text="{Binding LaunchPreview}" Classes="mono faint small" TextWrapping="Wrap" /></c:Field>
+          </StackPanel>
+        </c:Card>
+
+        <c:Card Title="World &amp; gameplay" Icon="globe" Description="Written to server.properties; applies on the next start." IsVisible="{Binding HasProperties}">
+          <StackPanel Spacing="14">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+              <c:Field Label="Gamemode"><ComboBox ItemsSource="{x:Static vm:ServerSettingsViewModel.Gamemodes}" SelectedItem="{Binding Gamemode, Mode=TwoWay}" HorizontalAlignment="Stretch" /></c:Field>
+              <c:Field Grid.Column="1" Label="Difficulty"><ComboBox ItemsSource="{x:Static vm:ServerSettingsViewModel.Difficulties}" SelectedItem="{Binding Difficulty, Mode=TwoWay}" HorizontalAlignment="Stretch" /></c:Field>
+              <c:Field Grid.Column="2" Label="Max players"><NumericUpDown Value="{Binding MaxPlayers, Mode=TwoWay}" Minimum="1" Maximum="1000" FormatString="0" /></c:Field>
+            </Grid>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+              <c:Field Label="Port" Hint="Friends connect to this port."><NumericUpDown Value="{Binding Port, Mode=TwoWay}" Minimum="1024" Maximum="65535" FormatString="0" IsEnabled="{Binding CanEdit}" /></c:Field>
+              <c:Field Grid.Column="1" Label="View distance" Hint="Chunks. Lower is lighter." IsVisible="{Binding IsJava}"><NumericUpDown Value="{Binding ViewDistance, Mode=TwoWay}" Minimum="2" Maximum="32" FormatString="0" /></c:Field>
+            </Grid>
+            <Button Classes="ghost sm" Content="Lighten for a slow PC…" Command="{Binding LowSpecCommand}" HorizontalAlignment="Left" IsVisible="{Binding HasProperties}" ToolTip.Tip="Lower view and simulation distance so the server runs better on a small PC" />
+            <StackPanel Spacing="12" IsVisible="{Binding IsJava}">
+              <c:SettingRow Title="PvP" Hint="Players can hurt each other."><ToggleSwitch IsChecked="{Binding Pvp, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+              <c:SettingRow Title="Whitelist" Hint="Only approved players can join."><ToggleSwitch IsChecked="{Binding Whitelist, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+              <c:SettingRow Title="Allow flight" Hint="Stops the server kicking players for flying (mods, creative)."><ToggleSwitch IsChecked="{Binding AllowFlight, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+              <c:SettingRow Title="Command blocks"><ToggleSwitch IsChecked="{Binding CommandBlocks, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+            </StackPanel>
+          </StackPanel>
+        </c:Card>
+
+        <c:Card Title="Automation" Icon="clock" Description="Let OMNIServers look after the server when you're not watching.">
+          <StackPanel Spacing="16">
+            <c:SettingRow Title="Restart if it crashes" Hint="Waits a few seconds, then starts it again. Gives up after the limit below so a broken server doesn't loop forever.">
+              <ToggleSwitch IsChecked="{Binding RestartOnCrash, Mode=TwoWay}" OnContent="" OffContent="" />
+            </c:SettingRow>
+            <c:SettingRow Title="Most restarts in 10 minutes" IsVisible="{Binding RestartOnCrash}"><NumericUpDown Value="{Binding MaxCrashRestarts, Mode=TwoWay}" Minimum="1" Maximum="20" FormatString="0" Width="110" /></c:SettingRow>
+            <c:SettingRow Title="Restart every day" Hint="Players get a one-minute warning in chat first. A fresh restart keeps big servers snappy.">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBox Text="{Binding DailyRestartAt, Mode=TwoWay}" Width="80" HorizontalContentAlignment="Center" IsEnabled="{Binding DailyRestartOn}" />
+                <ToggleSwitch IsChecked="{Binding DailyRestartOn, Mode=TwoWay}" OnContent="" OffContent="" />
+              </StackPanel>
+            </c:SettingRow>
+            <c:SettingRow Title="When the server starts" Hint="One command per line, sent once each time it finishes starting. For example: gamerule keepInventory true"><TextBox Text="{Binding OnStartText, Mode=TwoWay}" AcceptsReturn="True" MinHeight="64" MinWidth="260" /></c:SettingRow>
+            <c:SettingRow Title="Back up after every stop" Hint="A clean copy each time the server shuts down (not when it's only restarting)."><ToggleSwitch IsChecked="{Binding BackupOnStop, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+            <c:SettingRow Title="Time Machine snapshots" Hint="{Binding SnapshotSummary}">
+              <ToggleSwitch IsChecked="{Binding SnapshotsOn, Mode=TwoWay}" OnContent="" OffContent="" />
+            </c:SettingRow>
+            <StackPanel Spacing="16" IsVisible="{Binding SnapshotsOn}">
+              <c:SettingRow Title="Snapshot every (minutes)"><NumericUpDown Value="{Binding SnapshotMins, Mode=TwoWay}" Minimum="5" Maximum="1440" FormatString="0" Width="110" /></c:SettingRow>
+              <c:SettingRow Title="Keep every snapshot from the last (hours)"><NumericUpDown Value="{Binding SnapshotRecentHours, Mode=TwoWay}" Minimum="1" Maximum="168" FormatString="0" Width="110" /></c:SettingRow>
+              <c:SettingRow Title="Then keep one a day for (days)"><NumericUpDown Value="{Binding SnapshotDailyDays, Mode=TwoWay}" Minimum="1" Maximum="365" FormatString="0" Width="110" /></c:SettingRow>
+            </StackPanel>
+            <c:SettingRow Title="Start with OMNIServers" Hint="Starts this server whenever OMNIServers opens."><ToggleSwitch IsChecked="{Binding AutoStartWithApp, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+          </StackPanel>
+        </c:Card>
+
+        <c:Card Title="Remote console (RCON)" Icon="terminal" IsVisible="{Binding IsJava}" Description="How OMNIServers talks to a server it didn't start itself, and how the Players tab works.">
+          <StackPanel Spacing="10">
+            <TextBlock Text="{Binding RconStatus}" Classes="dim" TextWrapping="Wrap" />
+            <Button Content="Set up RCON" Classes="ghost" HorizontalAlignment="Left" Command="{Binding EnableRconCommand}" />
+          </StackPanel>
+        </c:Card>
+
+        <c:Card Title="Expert: server.properties" Icon="file" IsVisible="{Binding ExpertMode}" Description="The raw file. Careful: online-mode=false lets anyone join under any name.">
+          <StackPanel Spacing="8">
+            <TextBox Classes="mono" Text="{Binding RawProperties, Mode=TwoWay}" AcceptsReturn="True" MinHeight="220" MaxHeight="420" FontSize="12" />
+            <Button Content="Save file" Classes="ghost" HorizontalAlignment="Left" Command="{Binding SaveRawCommand}" />
+          </StackPanel>
+        </c:Card>
+
+        <c:Card Title="Remove" Icon="trash">
+          <StackPanel Spacing="12">
+            <c:SettingRow Title="Remove from OMNIServers" Hint="Forget this server. Its folder and world stay where they are.">
+              <Button Content="Remove" Classes="danger" Command="{Binding RemoveCommand}" IsEnabled="{Binding CanEdit}" />
+            </c:SettingRow>
+            <c:SettingRow Title="Delete server files" Hint="Moves the whole folder to a trash folder next to it.">
+              <Button Content="Delete…" Classes="danger" Command="{Binding DeleteFilesCommand}" IsEnabled="{Binding CanEdit}" />
+            </c:SettingRow>
+          </StackPanel>
+        </c:Card>
+      </StackPanel>
+    </ScrollViewer>
+
+    <Border Grid.Row="1" Classes="panel" Padding="18,10" IsVisible="{Binding Dirty}" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"><c:ToneDot Tone="warn" /><TextBlock Text="You have unsaved changes." /></StackPanel>
+        <Button Grid.Column="1" Content="Discard" Classes="ghost" Command="{Binding DiscardCommand}" />
+        <Button Grid.Column="2" Content="Save changes" Classes="primary" Command="{Binding SaveCommand}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

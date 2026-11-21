@@ -1,0 +1,63 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.PerformanceView"
+             x:DataType="vm:PerformanceViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="24,20" Spacing="16" MaxWidth="980" HorizontalAlignment="Stretch">
+      <TextBlock Text="Server performance" Classes="h2" />
+
+      <UniformGrid Columns="3">
+        <Border Classes="card" Margin="0,0,8,0">
+          <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="*,Auto"><TextBlock Text="CPU usage" Classes="label" /><c:Icon Grid.Column="1" Kind="cpu" Foreground="{DynamicResource Cp.InkDim}" /></Grid>
+            <TextBlock Text="{Binding CpuText}" Classes="h1" />
+            <ProgressBar Value="{Binding CpuBar}" Minimum="0" Maximum="100" Height="4" />
+          </StackPanel>
+        </Border>
+        <Border Classes="card" Margin="4,0">
+          <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="*,Auto"><TextBlock Text="Memory" Classes="label" /><c:Icon Grid.Column="1" Kind="database" Foreground="{DynamicResource Cp.InkDim}" /></Grid>
+            <TextBlock Text="{Binding RamText}" Classes="h1" />
+            <ProgressBar Value="{Binding RamBar}" Minimum="0" Maximum="100" Height="4" />
+          </StackPanel>
+        </Border>
+        <Border Classes="card" Margin="8,0,0,0">
+          <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="*,Auto"><TextBlock Text="Uptime" Classes="label" /><c:Icon Grid.Column="1" Kind="clock" Foreground="{DynamicResource Cp.InkDim}" /></Grid>
+            <TextBlock Text="{Binding Uptime}" Classes="h1" />
+            <StackPanel Orientation="Horizontal" Spacing="6" Height="4" />
+          </StackPanel>
+        </Border>
+      </UniformGrid>
+
+      <Border Classes="card" Padding="18">
+        <StackPanel Spacing="14">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+              <TextBlock Text="Performance graph" Classes="h3" />
+              <StackPanel Orientation="Horizontal" Spacing="6"><Border Width="10" Height="3" CornerRadius="2" Background="{DynamicResource Cp.Accent}" VerticalAlignment="Center" /><TextBlock Text="CPU" Classes="faint small" /></StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6"><Border Width="10" Height="3" CornerRadius="2" Background="{DynamicResource Cp.Warn}" VerticalAlignment="Center" /><TextBlock Text="Memory" Classes="faint small" /></StackPanel>
+            </StackPanel>
+            <Border Grid.Column="1" Background="{DynamicResource Cp.Surface2}" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="1" CornerRadius="7" Padding="3">
+              <ItemsControl ItemsSource="{Binding Ranges}">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="3" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:RangeChip">
+                    <RadioButton Classes="seg" GroupName="perfRange" MinWidth="40" IsChecked="{Binding IsActive, Mode=OneWay}" Command="{Binding SelectCommand}" Content="{Binding Label}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Border>
+          </Grid>
+          <Grid Height="260">
+            <c:LineChart Values="{Binding Cpu}" Values2="{Binding Ram}" Stroke="{DynamicResource Cp.Accent}" Stroke2="{DynamicResource Cp.Warn}" Grid="{DynamicResource Cp.Line}" IsVisible="{Binding HasData}" />
+            <c:EmptyState Icon="activity" Title="No data yet" Message="{Binding EmptyText}" IsVisible="{Binding NoData}" />
+          </Grid>
+          <TextBlock Text="{Binding PeakText}" Classes="faint small" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>CraftPanel.Cluster</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../CraftPanel.Core/CraftPanel.Core.csproj" />
+    <InternalsVisibleTo Include="CraftPanel.Tests" />
+  </ItemGroup>
+</Project>

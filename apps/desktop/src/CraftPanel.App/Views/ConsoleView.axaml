@@ -1,0 +1,71 @@
+<UserControl xmlns:core="using:CraftPanel.Core" xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.ConsoleView"
+             x:DataType="vm:ConsoleViewModel">
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <!-- mode + tools -->
+    <Border Grid.Row="0" Classes="panel" Padding="14,16,14,12">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <Border Background="{DynamicResource Cp.Surface2}" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="1" CornerRadius="7" Padding="3">
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="3">
+            <RadioButton Classes="seg" GroupName="consoleMode" IsChecked="{Binding LiveMode, Mode=TwoWay}" Content="Live console" />
+            <RadioButton Classes="seg" Grid.Column="1" GroupName="consoleMode" IsChecked="{Binding LogMode, Mode=TwoWay}" Content="Log file" />
+          </Grid>
+        </Border>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+          <TextBox Text="{Binding Filter, Mode=TwoWay}" PlaceholderText="Filter…" Width="170" FontSize="12" />
+          <Button Classes="ghost square" Command="{Binding CopyCommand}" ToolTip.Tip="Copy the visible output"><c:Icon Kind="copy" /></Button>
+          <Button Classes="ghost square" Command="{Binding ClearCommand}" ToolTip.Tip="Clear the view"><c:Icon Kind="trash" /></Button>
+          <Button Classes="ghost square" Command="{Binding OpenLogsCommand}" ToolTip.Tip="Open the logs folder"><c:Icon Kind="folder-open" /></Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <StackPanel Grid.Row="1">
+    <!-- EULA -->
+    <Border Classes="banner warn" Margin="14,0,14,10" IsVisible="{Binding NeedsEula}">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+        <c:Icon Kind="alert" Foreground="{DynamicResource Cp.Warn}" VerticalAlignment="Top" Margin="0,1,0,0" />
+        <StackPanel Grid.Column="1" Spacing="2">
+          <TextBlock Text="Minecraft's EULA needs accepting" FontWeight="SemiBold" />
+          <TextBlock Text="The server stopped because eula.txt says eula=false. By accepting you agree to Mojang's EULA (aka.ms/MinecraftEULA)." Classes="dim small" TextWrapping="Wrap" />
+        </StackPanel>
+        <Button Grid.Column="2" Classes="primary sm" Content="Accept and start" Command="{Binding AcceptEulaCommand}" />
+      </Grid>
+    </Border>
+
+    <!-- what the log says is wrong -->
+    <ItemsControl Margin="14,0,14,0" ItemsSource="{Binding Findings}" IsVisible="{Binding HasFindings}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="core:LogFinding">
+          <Border Classes="banner warn" Margin="0,0,0,6">
+            <StackPanel Spacing="2"><TextBlock Text="{Binding Title}" FontWeight="SemiBold" /><TextBlock Text="{Binding Advice}" Classes="dim small" TextWrapping="Wrap" /></StackPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    </StackPanel>
+
+    <!-- output -->
+    <Grid Grid.Row="2" Background="{DynamicResource Cp.Console}">
+      <ScrollViewer Name="Scroller" HorizontalScrollBarVisibility="Disabled">
+        <SelectableTextBlock Name="Output" Classes="mono" FontSize="12" LineHeight="17" TextWrapping="Wrap" Margin="14,10" />
+      </ScrollViewer>
+      <Button Name="JumpButton" Classes="primary sm" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16" IsVisible="False" Click="OnJumpClick">
+        <StackPanel Orientation="Horizontal" Spacing="6"><c:Icon Kind="arrow-down" Width="13" Height="13" /><TextBlock Text="Jump to latest" Foreground="{DynamicResource Cp.OnAccent}" /></StackPanel>
+      </Button>
+    </Grid>
+
+    <!-- command -->
+    <Border Grid.Row="3" Classes="panel" Padding="12,10">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+        <TextBlock Text="›" Classes="mono accent" FontSize="16" VerticalAlignment="Center" Margin="2,0,0,2" />
+        <TextBox Name="CommandBox" Grid.Column="1" Classes="mono" Text="{Binding Command, Mode=TwoWay}" PlaceholderText="{Binding Placeholder}" IsEnabled="{Binding IsRunning}" />
+        <Button Grid.Column="2" Classes="primary" Command="{Binding SendCommand}" Content="Send" IsEnabled="{Binding IsRunning}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.WorldsView"
+             x:DataType="vm:WorldsViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="24,20" Spacing="16" MaxWidth="760" HorizontalAlignment="Center">
+      <Border Classes="banner" IsVisible="{Binding HasStatus}"><TextBlock Text="{Binding Status}" TextWrapping="Wrap" /></Border>
+      <c:Card Title="Worlds" Icon="globe" Description="Each world is a folder. The active one is what the server loads. Got a world from a friend or from single-player? Drag its folder or .zip anywhere on this page, or use Add a world.">
+        <c:Card.Actions>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Classes="primary sm" Content="Add a world ▾">
+              <Button.Flyout>
+                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                  <MenuItem Header="From a folder…" Command="{Binding AddFolderCommand}" />
+                  <MenuItem Header="From a .zip…" Command="{Binding AddZipCommand}" />
+                  <MenuItem Header="From my single-player worlds…" Command="{Binding AddSingleplayerCommand}" />
+                </MenuFlyout>
+              </Button.Flyout>
+            </Button>
+            <Button Classes="ghost sm" Content="Export world" Command="{Binding ExportCommand}" ToolTip.Tip="Save the active world as a .zip you can send or add to another server" />
+            <Button Classes="ghost sm" Content="New world…" Command="{Binding NewWorldCommand}" IsEnabled="{Binding CanEdit}" />
+          </StackPanel>
+        </c:Card.Actions>
+        <StackPanel>
+          <c:EmptyState Icon="globe" Title="No world yet" Message="Start the server once and it generates one." IsVisible="{Binding IsEmpty}" />
+          <ItemsControl ItemsSource="{Binding Worlds}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:WorldRow">
+                <Border Padding="0,10" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="0,0,0,1">
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <StackPanel Spacing="3">
+                      <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{Binding Name}" FontWeight="SemiBold" /><Border Classes="badge ok" IsVisible="{Binding Active}"><TextBlock Text="active" /></Border></StackPanel>
+                      <TextBlock Classes="faint small"><Run Text="{Binding Size}" /><Run Text="  ·  changed " /><Run Text="{Binding Modified}" /></TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                      <Button Classes="ghost sm" Content="Use this world" IsVisible="{Binding !Active}" Command="{Binding $parent[UserControl].((vm:WorldsViewModel)DataContext).SetActiveCommand}" CommandParameter="{Binding}" />
+                      <Button Classes="ghost sm" Content="Edit level.dat" IsVisible="{Binding HasLevelDat}" Command="{Binding $parent[UserControl].((vm:WorldsViewModel)DataContext).EditLevelCommand}" CommandParameter="{Binding}" />
+                      <Button Classes="ghost sm square" ToolTip.Tip="Open folder" Command="{Binding $parent[UserControl].((vm:WorldsViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}"><c:Icon Kind="folder-open" Width="13" Height="13" /></Button>
+                      <Button Classes="danger sm square" ToolTip.Tip="Move to trash" IsVisible="{Binding !Active}" Command="{Binding $parent[UserControl].((vm:WorldsViewModel)DataContext).DeleteCommand}" CommandParameter="{Binding}"><c:Icon Kind="trash" Width="13" Height="13" /></Button>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </c:Card>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

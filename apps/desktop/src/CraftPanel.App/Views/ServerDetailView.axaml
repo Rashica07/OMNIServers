@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:v="using:CraftPanel.App.Views"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.ServerDetailView"
+             x:DataType="vm:ServerDetailViewModel">
+  <UserControl.DataTemplates>
+    <DataTemplate DataType="vm:PerformanceViewModel"><v:PerformanceView /></DataTemplate>
+    <DataTemplate DataType="vm:ConsoleViewModel"><v:ConsoleView /></DataTemplate>
+    <DataTemplate DataType="vm:ChatViewModel"><v:ChatView /></DataTemplate>
+    <DataTemplate DataType="vm:PlayersViewModel"><v:PlayersView /></DataTemplate>
+    <DataTemplate DataType="vm:BackupsViewModel"><v:BackupsView /></DataTemplate>
+    <DataTemplate DataType="vm:NetworkViewModel"><v:NetworkView /></DataTemplate>
+    <DataTemplate DataType="vm:MapViewModel"><v:MapView /></DataTemplate>
+    <DataTemplate DataType="vm:AddonsViewModel"><v:AddonsView /></DataTemplate>
+    <DataTemplate DataType="vm:ModsViewModel"><v:ModsView /></DataTemplate>
+    <DataTemplate DataType="vm:FilesViewModel"><v:FilesView /></DataTemplate>
+    <DataTemplate DataType="vm:WorldsViewModel"><v:WorldsView /></DataTemplate>
+    <DataTemplate DataType="vm:ServerSettingsViewModel"><v:ServerSettingsView /></DataTemplate>
+    <DataTemplate DataType="vm:PlaceholderViewModel">
+      <c:EmptyState Icon="sparkle" Title="{Binding Title}" Message="Coming up next." />
+    </DataTemplate>
+  </UserControl.DataTemplates>
+
+  <Grid RowDefinitions="Auto,*,Auto,Auto">
+    <!-- header -->
+    <Border Grid.Row="0" Classes="panel" Padding="22,16,22,12">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="7">
+          <TextBlock Text="{Binding Server.Name}" Classes="h1" TextTrimming="CharacterEllipsis" />
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <c:Badge Text="{Binding Server.TypeLabel}" Tone="accent" />
+            <c:Badge Text="{Binding Server.Record.McVersion}" IsVisible="{Binding Server.Record.McVersion, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            <c:Badge Text="{Binding Server.StatusText}" Tone="{Binding Server.Tone}" />
+            <TextBlock Text="{Binding Server.OnlineText}" Classes="faint small" VerticalAlignment="Center" Margin="4,0,0,0" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasAddress}">
+            <Border Classes="chip" Padding="10,5" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource Cp.Border}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <SelectableTextBlock Text="{Binding Address}" Classes="mono small" VerticalAlignment="Center" />
+              </StackPanel>
+            </Border>
+            <Button Classes="ghost sm" Content="Copy" Command="{Binding CopyAddressCommand}" />
+            <Button Classes="primary sm" Content="Join" Command="{Binding JoinCommand}" />
+          </StackPanel>
+          <ItemsControl ItemsSource="{Binding LaunchSteps}" IsVisible="{Binding ShowLaunch}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="16" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:LaunchStep">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <TextBlock Text="{Binding Mark}" Classes="faint small" Width="12" />
+                  <TextBlock Text="{Binding Label}" Classes="small" Opacity="{Binding Opacity}" />
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+          <Button Classes="primary" Command="{Binding StartCommand}" IsVisible="{Binding Server.CanStart}" MinWidth="92">
+            <StackPanel Orientation="Horizontal" Spacing="7"><c:Icon Kind="play" Width="14" Height="14" /><TextBlock Text="Start" Foreground="{DynamicResource Cp.OnAccent}" /></StackPanel>
+          </Button>
+          <Button Classes="danger" Command="{Binding StopCommand}" IsVisible="{Binding Server.IsRunning}" MinWidth="92">
+            <StackPanel Orientation="Horizontal" Spacing="7"><c:Icon Kind="stop" Width="14" Height="14" /><TextBlock Text="Stop" Foreground="{DynamicResource Cp.Bad}" /></StackPanel>
+          </Button>
+          <Button Command="{Binding RestartCommand}" IsVisible="{Binding Server.IsRunning}" ToolTip.Tip="Restart"><c:Icon Kind="rotate" /></Button>
+          <Button Classes="square" ToolTip.Tip="More actions">
+            <c:Icon Kind="more-horizontal" />
+            <Button.Flyout>
+              <MenuFlyout Placement="BottomEdgeAlignedRight">
+                <MenuItem Header="Open folder" Command="{Binding OpenFolderCommand}"><MenuItem.Icon><c:Icon Kind="folder-open" /></MenuItem.Icon></MenuItem>
+                <MenuItem Header="Copy invite" Command="{Binding InviteCommand}"><MenuItem.Icon><c:Icon Kind="send" /></MenuItem.Icon></MenuItem>
+                <MenuItem Header="Change version…" Command="{Binding ChangeVersionCommand}"><MenuItem.Icon><c:Icon Kind="layers" /></MenuItem.Icon></MenuItem>
+                <Separator />
+                <MenuItem Header="Force kill" Command="{Binding KillCommand}"><MenuItem.Icon><c:Icon Kind="power" /></MenuItem.Icon></MenuItem>
+              </MenuFlyout>
+            </Button.Flyout>
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- side rail + section -->
+    <Grid Grid.Row="1" Grid.RowSpan="3" ColumnDefinitions="168,Auto,*">
+      <Border Classes="panel" Padding="8">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <ItemsControl ItemsSource="{Binding Tabs}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SectionTab">
+                <RadioButton Classes="side" GroupName="sections" IsChecked="{Binding IsActive, Mode=OneWay}" Command="{Binding SelectCommand}">
+                  <StackPanel Orientation="Horizontal" Spacing="9"><c:Icon Kind="{Binding Icon}" Width="14" Height="14" /><TextBlock Text="{Binding Label}" /></StackPanel>
+                </RadioButton>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Border>
+      <Border Grid.Column="1" Width="1" Background="{DynamicResource Cp.LineSoft}" />
+      <ContentControl Grid.Column="2" Content="{Binding Section}" />
+    </Grid>
+  </Grid>
+</UserControl>

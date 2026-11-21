@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftPanel.App.ViewModels"
+        x:Class="CraftPanel.App.Views.ReportWindow"
+        x:DataType="vm:ReportViewModel"
+        Title="Report a problem" Width="560" Height="640" MinHeight="480" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <ScrollViewer>
+    <StackPanel Margin="24,22" Spacing="14">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Report a problem" Classes="h1" />
+        <TextBlock Text="Tell us what went wrong. OMNIServers saves one file with what's needed to find the cause." Classes="dim" TextWrapping="Wrap" />
+      </StackPanel>
+      <Border Classes="banner bad" IsVisible="{Binding HasError}"><TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" Classes="small" MaxHeight="90" /></Border>
+      <StackPanel Spacing="6">
+        <TextBlock Text="WHAT HAPPENED?" Classes="label" />
+        <TextBox Text="{Binding Description, Mode=TwoWay}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="110" PlaceholderText="e.g. I press Start and nothing happens / it says the world is broken…" />
+      </StackPanel>
+      <StackPanel Spacing="6">
+        <TextBlock Text="WHICH SERVER? (its console is added)" Classes="label" />
+        <ComboBox ItemsSource="{Binding Servers}" SelectedItem="{Binding SelectedServer, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+      </StackPanel>
+      <TextBlock Text="{Binding PrivacyNote}" Classes="faint small" TextWrapping="Wrap" />
+      <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+        <Button Classes="primary" Content="Save report" Command="{Binding SaveCommand}" HorizontalAlignment="Stretch" />
+        <Button Grid.Column="1" Classes="ghost" Content="Copy summary" Command="{Binding CopyCommand}" HorizontalAlignment="Stretch" />
+        <Button Grid.Column="2" Classes="ghost" Content="Report on GitHub" Command="{Binding IssueCommand}" HorizontalAlignment="Stretch" />
+      </Grid>
+      <Border Classes="banner" IsVisible="{Binding HasStatus}"><TextBlock Text="{Binding Status}" TextWrapping="Wrap" /></Border>
+      <Button Classes="ghost" Content="Open the folder with the report" Command="{Binding OpenFolderCommand}" IsVisible="{Binding HasSaved}" HorizontalAlignment="Left" />
+      <Button Classes="ghost" Content="Close" Command="{Binding CloseCommand}" HorizontalAlignment="Right" />
+    </StackPanel>
+  </ScrollViewer>
+</Window>

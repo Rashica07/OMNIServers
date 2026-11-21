@@ -1,0 +1,78 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.OverviewView"
+             x:DataType="vm:OverviewViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="28,24" Spacing="20" MaxWidth="1000" HorizontalAlignment="Stretch">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="3">
+          <TextBlock Text="Overview" Classes="h1" />
+          <TextBlock Text="{Binding Greeting}" Classes="faint" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasServers}" VerticalAlignment="Center">
+          <Button Classes="ghost" Command="{Binding StartAllCommand}"><StackPanel Orientation="Horizontal" Spacing="7"><c:Icon Kind="play" Width="14" Height="14" /><TextBlock Text="Start all" /></StackPanel></Button>
+          <Button Classes="ghost" Command="{Binding StopAllCommand}"><StackPanel Orientation="Horizontal" Spacing="7"><c:Icon Kind="stop" Width="14" Height="14" /><TextBlock Text="Stop all" /></StackPanel></Button>
+        </StackPanel>
+      </Grid>
+
+      <!-- empty -->
+      <Border Classes="card" Padding="32" IsVisible="{Binding Empty}">
+        <StackPanel Spacing="16" HorizontalAlignment="Center" MaxWidth="460">
+          <Image Source="avares://CraftPanel/Assets/glyph.png" Width="64" Height="64" />
+          <TextBlock Text="Welcome to OMNIServers" Classes="h2" HorizontalAlignment="Center" />
+          <TextBlock Text="Run a Minecraft server on this computer in three steps." Classes="dim" TextWrapping="Wrap" TextAlignment="Center" />
+          <StackPanel Spacing="6" HorizontalAlignment="Stretch">
+            <TextBlock Text="1  Create a server. One click gets the latest Minecraft with the right amount of memory." Classes="dim" TextWrapping="Wrap" />
+            <TextBlock Text="2  Press Start. Java is installed for you if it is missing." Classes="dim" TextWrapping="Wrap" />
+            <TextBlock Text="3  Share the address. The Network tab shows what friends should type." Classes="dim" TextWrapping="Wrap" />
+          </StackPanel>
+          <StackPanel Spacing="10" IsVisible="{Binding QuickIdle}">
+            <Button Classes="primary lg" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding QuickCreateCommand}" Content="Create my server" />
+            <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding BrowseCommand}" Content="Choose a version, modpack or game mode" />
+          </StackPanel>
+          <StackPanel Spacing="8" IsVisible="{Binding QuickBusy}">
+            <ProgressBar IsIndeterminate="{Binding QuickIndeterminate}" Value="{Binding QuickValue}" Maximum="100" />
+            <TextBlock Text="{Binding QuickMessage}" Classes="dim small" HorizontalAlignment="Center" TextWrapping="Wrap" />
+          </StackPanel>
+          <TextBlock Text="{Binding QuickError}" IsVisible="{Binding HasQuickError}" Classes="bad small" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+
+      <!-- stats -->
+      <UniformGrid Columns="4" IsVisible="{Binding HasServers}">
+        <Border Classes="card" Margin="0,0,8,0"><StackPanel Spacing="4"><TextBlock Text="Servers" Classes="label" /><TextBlock Text="{Binding Total}" Classes="h1" /></StackPanel></Border>
+        <Border Classes="card" Margin="4,0"><StackPanel Spacing="4"><TextBlock Text="Running" Classes="label" /><TextBlock Text="{Binding Running}" Classes="h1 ok" /></StackPanel></Border>
+        <Border Classes="card" Margin="4,0"><StackPanel Spacing="4"><TextBlock Text="Players online" Classes="label" /><TextBlock Text="{Binding PlayersOnline}" Classes="h1" /></StackPanel></Border>
+        <Border Classes="card" Margin="8,0,0,0"><StackPanel Spacing="4"><TextBlock Text="Memory in use" Classes="label" /><TextBlock Text="{Binding AllocatedText}" Classes="h1" /></StackPanel></Border>
+      </UniformGrid>
+
+      <ItemsControl ItemsSource="{Binding Servers}" IsVisible="{Binding HasServers}" Margin="0,0,-12,0">
+        <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="{Binding GridColumns}" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:ServerItemViewModel">
+            <Button Classes="servercard" Tag="noshake" Height="NaN" Padding="0" Margin="0,0,12,12" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch"
+                    Command="{Binding $parent[ItemsControl].((vm:OverviewViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}">
+              <Border Classes="servercardbody" Padding="18">
+                <StackPanel Spacing="10">
+                  <Grid ColumnDefinitions="Auto,*,Auto">
+                    <c:ToneDot Tone="{Binding Tone}" Margin="0,0,9,0" />
+                    <TextBlock Grid.Column="1" Text="{Binding Name}" Classes="h3" TextTrimming="CharacterEllipsis" />
+                    <c:Badge Grid.Column="2" Text="{Binding StatusText}" Tone="{Binding Tone}" />
+                  </Grid>
+                  <TextBlock Text="{Binding Subtitle}" Classes="faint" HorizontalAlignment="Left" />
+                  <Grid ColumnDefinitions="*,*,*">
+                    <StackPanel Spacing="2"><TextBlock Text="Players" Classes="label" /><TextBlock Text="{Binding OnlineCount}" FontWeight="SemiBold" HorizontalAlignment="Left" /></StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="Memory" Classes="label" /><TextBlock Text="{Binding RamUsedText}" FontWeight="SemiBold" HorizontalAlignment="Left" /></StackPanel>
+                    <StackPanel Grid.Column="2" Spacing="2"><TextBlock Text="CPU" Classes="label" /><TextBlock Text="{Binding CpuText}" FontWeight="SemiBold" HorizontalAlignment="Left" /></StackPanel>
+                  </Grid>
+                </StackPanel>
+              </Border>
+            </Button>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

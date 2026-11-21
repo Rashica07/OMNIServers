@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.AddonsView"
+             x:DataType="vm:AddonsViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="24,20" Spacing="16" MaxWidth="820" HorizontalAlignment="Center">
+      <c:Card Title="Browse" Icon="sparkle" Description="{Binding McLine}">
+        <StackPanel Spacing="12">
+          <ItemsControl ItemsSource="{Binding Kinds}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="6" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:AddonsViewModel+KindChoice">
+                <RadioButton Classes="seg" GroupName="addonKind" Padding="14,6" IsChecked="{Binding On, Mode=OneWay}" Command="{Binding PickCommand}" Content="{Binding Label}" HorizontalAlignment="Left" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox Name="SearchBox" Text="{Binding Query, Mode=TwoWay}" PlaceholderText="Search Modrinth…" />
+            <Button Grid.Column="1" Classes="primary" Content="Search" Command="{Binding SearchCommand}" />
+          </Grid>
+          <Border Classes="banner" IsVisible="{Binding HasStatus}"><TextBlock Text="{Binding Status}" Classes="dim" TextWrapping="Wrap" /></Border>
+          <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding Loading}" />
+          <c:EmptyState Icon="search" Title="Nothing found" Message="Try a different search." IsVisible="{Binding NoResults}" />
+          <ItemsControl ItemsSource="{Binding Results}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:AddonRow">
+                <Border Padding="0,10" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="0,0,0,1">
+                  <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                    <Border Width="44" Height="44" CornerRadius="8" Background="{DynamicResource Cp.Surface3}" ClipToBounds="True" VerticalAlignment="Top">
+                      <Image Source="{Binding Icon}" Stretch="UniformToFill" IsVisible="{Binding HasIcon}" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="3">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                        <Border Classes="badge warn" IsVisible="{Binding NotCompatible}"><TextBlock Text="no build for this version" /></Border>
+                      </StackPanel>
+                      <TextBlock Text="{Binding Description}" Classes="dim small" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Text="{Binding Downloads}" Classes="ghost tiny" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                      <Button Classes="primary sm" Content="Install" IsVisible="{Binding CanInstall}" Command="{Binding $parent[UserControl].((vm:AddonsViewModel)DataContext).InstallCommand}" CommandParameter="{Binding}" MinWidth="80" />
+                      <Border Classes="badge ok" IsVisible="{Binding Installed}"><TextBlock Text="Installed" /></Border>
+                      <ProgressBar IsIndeterminate="True" Width="70" Height="3" IsVisible="{Binding Busy}" />
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Content="Load more" Classes="ghost" HorizontalAlignment="Center" Command="{Binding MoreCommand}" IsVisible="{Binding CanLoadMore}" />
+        </StackPanel>
+      </c:Card>
+
+      <c:Card Title="Installed from Modrinth" Icon="package">
+        <c:Card.Actions><Button Classes="ghost sm" Content="Check for updates" Command="{Binding UpdateCheckCommand}" /></c:Card.Actions>
+        <StackPanel>
+          <TextBlock Text="Nothing installed through OMNIServers yet." Classes="faint" IsVisible="{Binding NoInstalled}" />
+          <ItemsControl ItemsSource="{Binding Installed}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:InstalledRow">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Margin="0,7">
+                  <StackPanel Spacing="1"><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{Binding Title}" FontWeight="Medium" /><Border Classes="badge" IsVisible="{Binding IsDependency}"><TextBlock Text="dependency" /></Border></StackPanel><TextBlock Text="{Binding Version}" Classes="faint small" /></StackPanel>
+                  <Button Grid.Column="1" Classes="primary sm" Content="{Binding UpdateText}" IsVisible="{Binding HasUpdate}" Command="{Binding $parent[UserControl].((vm:AddonsViewModel)DataContext).UpdateCommand}" CommandParameter="{Binding}" />
+                  <Button Grid.Column="2" Classes="danger sm square" ToolTip.Tip="Remove" Command="{Binding $parent[UserControl].((vm:AddonsViewModel)DataContext).RemoveCommand}" CommandParameter="{Binding}"><c:Icon Kind="trash" Width="13" Height="13" /></Button>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </c:Card>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

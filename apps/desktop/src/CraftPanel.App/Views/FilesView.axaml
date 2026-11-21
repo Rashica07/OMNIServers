@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.FilesView"
+             x:DataType="vm:FilesViewModel">
+  <Grid ColumnDefinitions="*,Auto">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <Border Classes="panel" Padding="14,10">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+          <Button Classes="ghost square" Command="{Binding UpCommand}" ToolTip.Tip="Up one folder"><c:Icon Kind="arrow-up" /></Button>
+          <TextBlock Grid.Column="1" Text="{Binding Location}" Classes="mono dim" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
+            <Button Classes="ghost sm" Content="New folder" Command="{Binding NewFolderCommand}" />
+            <Button Classes="ghost sm" Content="Add files…" Command="{Binding UploadCommand}" />
+            <Button Classes="ghost sm" Content="Rename" Command="{Binding RenameCommand}" IsEnabled="{Binding HasSelection}" />
+            <Button Classes="danger sm" Content="Delete" Command="{Binding DeleteCommand}" IsEnabled="{Binding HasSelection}" />
+            <Button Classes="ghost sm square" Command="{Binding ExplorerCommand}" ToolTip.Tip="Open in Explorer"><c:Icon Kind="folder-open" Width="13" Height="13" /></Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+      <Border Grid.Row="1" Classes="banner warn" Margin="14,10,14,0" IsVisible="{Binding HasStatus}"><TextBlock Text="{Binding Status}" TextWrapping="Wrap" /></Border>
+      <Grid Grid.Row="2" Margin="14,10">
+        <c:EmptyState Icon="folder" Title="This folder is empty" IsVisible="{Binding IsEmpty}" />
+        <ListBox Name="List" Classes="plain" ItemsSource="{Binding Entries}" SelectedItem="{Binding Selected, Mode=TwoWay}" DoubleTapped="OnDoubleTapped">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:FileRow">
+              <Grid ColumnDefinitions="Auto,*,90,150" ColumnSpacing="10" Margin="10,7" Background="Transparent">
+                <c:Icon Kind="{Binding Icon}" Width="15" Height="15" Foreground="{DynamicResource Cp.InkFaint}" />
+                <TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="{Binding SizeText}" Classes="faint small" HorizontalAlignment="Right" />
+                <TextBlock Grid.Column="3" Text="{Binding Modified}" Classes="faint small" HorizontalAlignment="Right" />
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </Grid>
+
+    <!-- editor -->
+    <Border Grid.Column="1" Classes="panel" Width="440" IsVisible="{Binding IsEditing}" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="1,0,0,0">
+      <Grid RowDefinitions="Auto,*">
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6" Margin="14,10">
+          <TextBlock Text="{Binding EditingTitle}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+          <Button Grid.Column="1" Classes="primary sm" Content="Save" Command="{Binding SaveCommand}" />
+          <Button Grid.Column="2" Classes="ghost sm square" Command="{Binding CloseEditorCommand}"><c:Icon Kind="x" Width="13" Height="13" /></Button>
+        </Grid>
+        <TextBox Grid.Row="1" Classes="mono" Text="{Binding EditText, Mode=TwoWay}" AcceptsReturn="True" AcceptsTab="True" FontSize="12" CornerRadius="0" BorderThickness="0,1,0,0" TextWrapping="NoWrap" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

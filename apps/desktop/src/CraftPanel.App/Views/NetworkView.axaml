@@ -1,0 +1,199 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.NetworkView"
+             x:DataType="vm:NetworkViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="24,20" Spacing="16" MaxWidth="760" HorizontalAlignment="Center">
+      <Border Classes="banner" IsVisible="{Binding HasNote}"><TextBlock Text="{Binding Note}" Classes="dim" TextWrapping="Wrap" /></Border>
+
+      <c:Card Title="How friends join" Icon="signal" Description="{Binding RecommendedLabel}">
+        <StackPanel Spacing="14">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <Border Background="{DynamicResource Cp.Surface3}" CornerRadius="6" Padding="14,10"><SelectableTextBlock Text="{Binding Recommended}" Classes="mono" FontSize="16" /></Border>
+            <Button Grid.Column="1" Classes="primary" Command="{Binding CopyCommand}" CommandParameter="{Binding Recommended}" Content="Copy" Height="42" />
+          </Grid>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Classes="ghost sm" Content="Copy invite message" Command="{Binding CopyInviteCommand}" ToolTip.Tip="A ready-to-send message with the address and which Minecraft to use" />
+            <Button Classes="ghost sm" Content="Test my server" Command="{Binding TestServerCommand}" ToolTip.Tip="Checks whether the running server answers on this PC's network address" />
+          </StackPanel>
+          <Border Classes="banner" IsVisible="{Binding HasTestResult}"><TextBlock Text="{Binding TestResult}" TextWrapping="Wrap" /></Border>
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+            <c:Field Label="On this pc"><StackPanel Orientation="Horizontal" Spacing="6"><SelectableTextBlock Text="{Binding LocalAddress}" Classes="mono" VerticalAlignment="Center" /><Button Classes="quiet sm square" Command="{Binding CopyCommand}" CommandParameter="{Binding LocalAddress}"><c:Icon Kind="copy" Width="13" Height="13" /></Button></StackPanel></c:Field>
+            <c:Field Grid.Column="1" Label="ON YOUR NETWORK (LAN)"><StackPanel Orientation="Horizontal" Spacing="6"><SelectableTextBlock Text="{Binding LanAddress}" Classes="mono" VerticalAlignment="Center" /><Button Classes="quiet sm square" Command="{Binding CopyCommand}" CommandParameter="{Binding LanAddress}"><c:Icon Kind="copy" Width="13" Height="13" /></Button></StackPanel></c:Field>
+          </Grid>
+        </StackPanel>
+      </c:Card>
+
+      <c:Card Title="School or guest Wi-Fi" Icon="wifi" Description="Some networks stop devices from seeing each other. You can ask IT to allow this connection without opening an internet port.">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="dim" TextWrapping="Wrap" Text="If the server answers on this PC but friends still cannot join, school or guest Wi-Fi may have client isolation turned on. Your network administrator can check it. The free tunnel is another option for Java servers." />
+          <Button Classes="ghost sm" Content="Copy request for IT" Command="{Binding CopyNetworkRequestCommand}" HorizontalAlignment="Left" />
+        </StackPanel>
+      </c:Card>
+
+      <c:Card Title="Free tunnel" Icon="link" IsVisible="{Binding JavaServer}" Description="One click gives you a bore.pub address friends can use from anywhere — no account, no router settings. The address stays the same while the tunnel is on and changes if you turn it off and on again.">
+        <StackPanel Spacing="12">
+          <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding TunnelStopped}">
+            <Button Classes="primary" Content="Start tunnel" Command="{Binding StartTunnelCommand}" />
+          </StackPanel>
+          <StackPanel Spacing="10" IsVisible="{Binding TunnelRunning}">
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding TunnelHasAddress}">
+              <Border Background="{DynamicResource Cp.Surface3}" CornerRadius="6" Padding="14,10"><SelectableTextBlock Text="{Binding TunnelAddress}" Classes="mono" FontSize="15" Foreground="{DynamicResource Cp.OkSoft}" /></Border>
+              <Button Grid.Column="1" Classes="ghost" Content="Copy" Command="{Binding CopyCommand}" CommandParameter="{Binding TunnelAddress}" Height="42" />
+              <Button Grid.Column="2" Classes="danger" Content="Stop" Command="{Binding StopTunnelCommand}" Height="42" />
+            </Grid>
+            <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding TunnelOpening}">
+              <ProgressBar IsIndeterminate="True" Width="60" Height="4" />
+              <TextBlock Text="Opening the tunnel…" Classes="dim" />
+              <Button Classes="ghost sm" Content="Cancel" Command="{Binding StopTunnelCommand}" />
+            </StackPanel>
+          </StackPanel>
+          <TextBlock Text="{Binding TunnelError}" Classes="warn" TextWrapping="Wrap" IsVisible="{Binding HasTunnelError}" />
+        </StackPanel>
+      </c:Card>
+
+      <c:Card Title="Take turns with another PC" Icon="users" DataContext="{Binding Share}" x:DataType="vm:ShareCardViewModel" Description="Share this server's folder so two PCs can host the same world by taking turns. Only one PC can run it at a time, so the world is never corrupted.">
+        <StackPanel Spacing="12">
+          <StackPanel Spacing="10" IsVisible="{Binding NotShared}">
+            <TextBlock Classes="dim small" TextWrapping="Wrap" Text="For this to work the server's folder must be somewhere both PCs can open: a USB stick, a network drive, or a synced folder (OneDrive, Google Drive, Dropbox)." />
+            <Border Classes="banner warn" IsVisible="{Binding HasLocationNote}"><TextBlock Text="{Binding LocationNote}" TextWrapping="Wrap" Classes="small" /></Border>
+            <Button Classes="primary" Content="Share this server" Command="{Binding ShareCommand}" HorizontalAlignment="Left" />
+          </StackPanel>
+          <StackPanel Spacing="10" IsVisible="{Binding IsShared}">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+              <TextBlock Text="Code" Classes="label" VerticalAlignment="Center" />
+              <SelectableTextBlock Grid.Column="1" Text="{Binding Code}" Classes="mono" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+              <Button Grid.Column="2" Classes="ghost sm" Content="Copy" Command="{Binding CopyCodeCommand}" />
+            </Grid>
+            <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Classes="dim small" TextWrapping="Wrap" Text="On the other PC: New server → Add an existing folder… and pick this same folder. OMNIServers there sees it's shared and waits its turn." />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Classes="ghost sm" Content="Refresh" Command="{Binding RefreshCommand}" />
+              <Button Classes="danger sm" Content="Stop sharing" Command="{Binding StopSharingCommand}" />
+            </StackPanel>
+          </StackPanel>
+          <TextBlock Text="{Binding Error}" Classes="warn" TextWrapping="Wrap" IsVisible="{Binding HasError}" />
+        </StackPanel>
+      </c:Card>
+
+      <c:Card Title="Windows Firewall" Icon="shield" IsVisible="{Binding FirewallSupported}" Description="Windows asks about this the first time Java opens a port. If friends on your Wi-Fi can't connect, allow it here.">
+        <StackPanel Spacing="10">
+          <TextBlock Text="{Binding FirewallStatus}" Classes="dim" IsVisible="{Binding HasFirewallStatus}" TextWrapping="Wrap" />
+          <Button Content="Allow through Windows Firewall" Classes="ghost" HorizontalAlignment="Left" Command="{Binding FirewallCommand}" />
+        </StackPanel>
+      </c:Card>
+
+      <c:Card Title="Port rules" Icon="shield" DataContext="{Binding Ports}" x:DataType="vm:PortRulesViewModel" Description="The ports this server needs open. Pick a game, adjust the list, then allow it in the firewall or copy the commands. Your router and any tunnel are separate: they only change when you set them up above.">
+        <StackPanel Spacing="12">
+          <ItemsControl ItemsSource="{Binding Chips}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:PresetChip">
+                <RadioButton Classes="tab" GroupName="presets" Margin="0,0,6,6" IsChecked="{Binding IsActive, Mode=OneWay}" Command="{Binding PickCommand}" Content="{Binding Name}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Text="{Binding PresetNote}" Classes="faint small" TextWrapping="Wrap" />
+          <ItemsControl ItemsSource="{Binding Rules}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:RuleRow">
+                <Grid ColumnDefinitions="130,110,*,Auto" Margin="0,0,0,6">
+                  <ComboBox Grid.Column="0" ItemsSource="{x:Static vm:RuleRow.Protocols}" SelectedIndex="{Binding ProtocolIndex, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                  <TextBox Grid.Column="1" Margin="8,0,0,0" Text="{Binding Port, Mode=TwoWay}" PlaceholderText="Port" />
+                  <TextBox Grid.Column="2" Margin="8,0,0,0" Text="{Binding Label, Mode=TwoWay}" PlaceholderText="Label" />
+                  <Button Grid.Column="3" Margin="8,0,0,0" Classes="ghost sm" Content="Remove" Command="{Binding RemoveCommand}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Content="Add a port" Classes="ghost sm" HorizontalAlignment="Left" Command="{Binding AddRuleCommand}" />
+          <ItemsControl ItemsSource="{Binding Issues}" IsVisible="{Binding HasIssues}">
+            <ItemsControl.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding}" Classes="dim small" TextWrapping="Wrap" Margin="0,0,0,4" /></DataTemplate></ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="{Binding ApplyLabel}" Classes="primary" Command="{Binding ApplyCommand}" IsVisible="{Binding FirewallSupported}" />
+            <Button Content="Copy firewall commands" Classes="ghost" Command="{Binding CopyCommand}" />
+          </StackPanel>
+          <TextBlock Text="{Binding Status}" Classes="dim" IsVisible="{Binding HasStatus}" TextWrapping="Wrap" />
+          <Grid ColumnDefinitions="*,Auto,Auto">
+            <TextBox Text="{Binding PresetName, Mode=TwoWay}" PlaceholderText="Name to save these ports as a preset" />
+            <Button Grid.Column="1" Margin="8,0,0,0" Content="Save preset" Classes="ghost" Command="{Binding SavePresetCommand}" />
+            <Button Grid.Column="2" Margin="8,0,0,0" Content="Delete preset" Classes="ghost" Command="{Binding DeletePresetCommand}" />
+          </Grid>
+        </StackPanel>
+      </c:Card>
+
+      <c:Card Title="Play over the internet" Icon="globe" Description="Friends outside your home need your router to forward the port to this PC.">
+        <StackPanel Spacing="14">
+          <c:Field Label="AUTOMATIC PORT FORWARD (UPnP)" Hint="{Binding UpnpStatus}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Content="Forward the port" Classes="primary" Command="{Binding UpnpForwardCommand}" />
+              <Button Content="Check" Classes="ghost" Command="{Binding UpnpCheckCommand}" />
+              <Button Content="Remove" Classes="ghost" Command="{Binding UpnpRemoveCommand}" />
+            </StackPanel>
+          </c:Field>
+          <c:Field Label="Your public address" Hint="Looked up on request from api.ipify.org — nothing is sent about you or your server.">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Content="Look it up" Classes="ghost" Command="{Binding PublicIpCommand}" />
+              <SelectableTextBlock Text="{Binding PublicAddress}" Classes="mono" VerticalAlignment="Center" />
+              <Button Classes="quiet sm square" Command="{Binding CopyCommand}" CommandParameter="{Binding PublicAddress}" IsVisible="{Binding HasPublicIp}"><c:Icon Kind="copy" Width="13" Height="13" /></Button>
+            </StackPanel>
+          </c:Field>
+          <c:Field Label="Permanent address" Hint="Have a playit.gg, ngrok or domain address? Save it here and OMNIServers shows it to you first.">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+              <TextBox Text="{Binding Tunnel, Mode=TwoWay}" PlaceholderText="e.g. mc.example.com" />
+              <Button Grid.Column="1" Content="Save" Classes="ghost" Command="{Binding SaveTunnelCommand}" />
+            </Grid>
+          </c:Field>
+        </StackPanel>
+      </c:Card>
+      <c:Card Title="Bedrock (NetherNet)" Icon="gamepad" IsVisible="{Binding IsBedrock}" Description="Bedrock 26.60 players connect over NetherNet: a TCP sign-in, then the game over UDP.">
+        <StackPanel Spacing="12">
+          <Border Classes="banner warn" IsVisible="{Binding BdsLegacy}"><TextBlock Text="{Binding BdsLegacyText}" TextWrapping="Wrap" Classes="small" /></Border>
+          <Border Classes="banner warn" IsVisible="{Binding BdsAllowListOn}">
+            <StackPanel Spacing="8">
+              <TextBlock Text="{Binding BdsAllowListText}" TextWrapping="Wrap" Classes="small" />
+              <Button Classes="ghost sm" Content="Let anyone with the address join" Command="{Binding AllowAnyoneCommand}" HorizontalAlignment="Left" />
+            </StackPanel>
+          </Border>
+          <TextBlock Text="{Binding BdsPortsText}" Classes="dim small" TextWrapping="Wrap" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Classes="ghost" Content="Use my public address" Command="{Binding SetBedrockPublicAddressCommand}" ToolTip.Tip="Writes your public IP into server-udp-ports so Bedrock tells friends where to connect. Repeat it if your internet address changes." />
+          </StackPanel>
+          <TextBlock Text="{Binding BdsNote}" Classes="dim small" TextWrapping="Wrap" IsVisible="{Binding HasBdsNote}" />
+        </StackPanel>
+      </c:Card>
+      <c:Card Title="Bedrock cross-play" Icon="gamepad" IsVisible="{Binding XpAvailable}" Description="Let friends on phones, consoles and the Windows store edition join this Java server — no Java account needed.">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="dim" TextWrapping="Wrap" IsVisible="{Binding XpIncompatible}" Text="Cross-play needs Paper, Spigot, Fabric or NeoForge. Vanilla and Forge can't run Geyser — switch with Change Version in the server's menu and your world stays." />
+          <Button Classes="primary" Content="{Binding XpEnableLabel}" Command="{Binding EnableCrossplayCommand}" HorizontalAlignment="Left" IsVisible="{Binding XpOff}" />
+          <StackPanel Spacing="12" IsVisible="{Binding XpOn}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Border Classes="badge ok"><TextBlock Text="Geyser" /></Border>
+              <Border Classes="badge ok" IsVisible="{Binding XpFloodgate}"><TextBlock Text="Floodgate" /></Border>
+              <Border Classes="badge warn" IsVisible="{Binding XpFloodgateMissing}"><TextBlock Text="Floodgate missing" /></Border>
+            </StackPanel>
+            <TextBlock Classes="warn" TextWrapping="Wrap" IsVisible="{Binding XpNeedsRestart}" Text="Restart the server to load Geyser." />
+            <Border Classes="banner warn" IsVisible="{Binding XpNeedsUpdate}">
+              <StackPanel Spacing="8">
+                <TextBlock Text="{Binding XpUpdateText}" TextWrapping="Wrap" />
+                <Button Classes="primary sm" Content="{Binding XpUpdateLabel}" Command="{Binding UpdateGeyserCommand}" HorizontalAlignment="Left" />
+              </StackPanel>
+            </Border>
+            <Border Classes="banner warn" IsVisible="{Binding XpCloneWarning}"><TextBlock Text="{Binding XpCloneText}" TextWrapping="Wrap" Classes="small" /></Border>
+            <c:Field Label="{Binding XpAddressLabel}"><SelectableTextBlock Text="{Binding XpAddress}" Classes="mono" /></c:Field>
+            <TextBlock Text="{Binding XpUdpText}" Classes="dim small" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Classes="ghost" Content="Forward TCP + UDP" Command="{Binding ForwardBedrockCommand}" />
+              <Button Classes="ghost" Content="Allow in Windows Firewall" Command="{Binding BedrockFirewallCommand}" IsVisible="{Binding FirewallSupported}" />
+              <Button Classes="danger" Content="Remove cross-play" Command="{Binding DisableCrossplayCommand}" />
+            </StackPanel>
+          </StackPanel>
+          <TextBlock Text="{Binding XpError}" Classes="warn" TextWrapping="Wrap" IsVisible="{Binding HasXpError}" />
+        </StackPanel>
+      </c:Card>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

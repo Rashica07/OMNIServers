@@ -1,0 +1,86 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.ChatView"
+             x:DataType="vm:ChatViewModel">
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <!-- who's online -->
+    <Border Grid.Row="0" Classes="panel" Padding="16,10">
+      <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <c:ToneDot Tone="{Binding IsRunning, Converter={x:Static vm:Tones.RunningTone}}" />
+          <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold" />
+        </StackPanel>
+        <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+          <ItemsControl ItemsSource="{Binding Online}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="6" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:OnlinePlayer">
+                <Border Background="{DynamicResource Cp.Surface3}" CornerRadius="99" Padding="3,3,10,3">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Border Width="18" Height="18" CornerRadius="5" Background="{Binding Avatar}"><TextBlock Text="{Binding Initial}" FontSize="10" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                    <TextBlock Text="{Binding Name}" Classes="dim small" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+    <Border Grid.Row="1" Classes="rule" />
+
+    <!-- messages -->
+    <Grid Grid.Row="2" Background="{DynamicResource Cp.Console}">
+      <c:EmptyState Icon="message-circle" Title="No chat yet" Message="Messages, joins and advancements from this server show up here live." IsVisible="{Binding IsEmpty}" />
+      <ScrollViewer Name="Scroller">
+        <ItemsControl ItemsSource="{Binding Messages}" Margin="16,10">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:ChatRowViewModel">
+              <Grid>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Margin="0,6" IsVisible="{Binding IsMessage}">
+                  <Border Width="26" Height="26" CornerRadius="7" Background="{Binding Avatar}" VerticalAlignment="Top">
+                    <Panel>
+                      <TextBlock Text="{Binding Initial}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !IsBroadcast}" />
+                      <c:Icon Kind="zap" Width="14" Height="14" Foreground="{DynamicResource Cp.Warn}" IsVisible="{Binding IsBroadcast}" />
+                    </Panel>
+                  </Border>
+                  <StackPanel Grid.Column="1" Spacing="1">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                      <TextBlock Text="{Binding Who}" FontWeight="SemiBold" Classes.accent="{Binding IsMine}" />
+                      <TextBlock Text="you" Classes="ghost tiny" IsVisible="{Binding IsMine}" VerticalAlignment="Center" />
+                      <TextBlock Text="{Binding Time}" Classes="ghost tiny" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" />
+                  </StackPanel>
+                </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="36,3" IsVisible="{Binding IsEvent}">
+                  <c:Icon Kind="{Binding EventIcon}" Width="14" Height="14" Foreground="{DynamicResource Cp.InkFaint}" />
+                  <TextBlock Text="{Binding EventText}" Classes="dim small" />
+                  <TextBlock Text="{Binding Time}" Classes="ghost tiny" VerticalAlignment="Center" />
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+      <Button Name="JumpButton" Classes="primary sm" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16" IsVisible="False" Click="OnJumpClick">
+        <StackPanel Orientation="Horizontal" Spacing="6"><c:Icon Kind="arrow-down" Width="13" Height="13" /><TextBlock Text="Jump to latest" Foreground="{DynamicResource Cp.OnAccent}" /></StackPanel>
+      </Button>
+    </Grid>
+
+    <!-- composer -->
+    <Border Grid.Row="3" Classes="panel" Padding="12,10">
+      <StackPanel Spacing="8">
+        <Border Classes="banner bad" IsVisible="{Binding HasError}"><TextBlock Text="{Binding Error}" Classes="bad" TextWrapping="Wrap" /></Border>
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <TextBox Name="DraftBox" Text="{Binding Draft, Mode=TwoWay}" PlaceholderText="{Binding Placeholder}" IsEnabled="{Binding IsRunning}" />
+          <Button Grid.Column="1" Classes="primary" Command="{Binding SendCommand}" IsEnabled="{Binding IsRunning}">
+            <StackPanel Orientation="Horizontal" Spacing="7"><c:Icon Kind="arrow-up" Width="14" Height="14" /><TextBlock Text="Send" Foreground="{DynamicResource Cp.OnAccent}" /></StackPanel>
+          </Button>
+        </Grid>
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

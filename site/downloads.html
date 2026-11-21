@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Download OMNIServers</title>
+<meta name="description" content="Download OMNIServers for Mac, Windows, Linux and Android. Free and open source, no account needed." />
+<link rel="canonical" href="https://omniservers.kiqa-dev.it/downloads.html" />
+<meta name="theme-color" content="#0f0e0d" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png" />
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+<link rel="manifest" href="site.webmanifest" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap nav">
+    <a class="brand" href="index.html"><img src="assets/icons/mark.svg" alt="" />OMNIServers</a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#features">Features</a>
+      <a href="index.html#compare">Compare</a>
+      <a href="index.html#open">Open source</a>
+      <a href="index.html#faq">FAQ</a>
+    </nav>
+    <div class="nav-end">
+      <a class="quiet" href="https://discord.gg/SQwCjE38Jt" target="_blank" rel="noreferrer">Discord</a><a class="quiet" href="https://github.com/Rashica07/OMNIServers" target="_blank" rel="noreferrer">GitHub</a>
+      <a class="btn btn-primary btn-sm" href="downloads.html" aria-current="page">Download</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section style="padding-top:72px">
+    <div class="wrap">
+      <div class="section-head">
+        <h1 style="font-size:clamp(32px,4vw,48px);margin-top:0">Download OMNIServers</h1>
+        <p>Free for Mac, Windows, Linux and Android. This page shows what is published on GitHub Releases right now; missing assets are never linked.</p>
+        <div id="version-pill-slot" style="margin-top:16px"></div>
+      </div>
+      <div id="dl-content">
+        <div class="dl-grid" id="placeholder">
+          <div class="dl"><h3>macOS</h3><p>Loading…</p></div>
+          <div class="dl"><h3>Windows</h3><p>Loading…</p></div>
+          <div class="dl"><h3>Linux</h3><p>Loading…</p></div>
+          <div class="dl"><h3>Android</h3><p>Not published yet.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <h2 style="margin-top:0">OMNI Launcher <span class="eyebrow mono">Dev build</span></h2>
+        <p>The Minecraft launcher that opens from the Play Minecraft icon in OMNIServers. These are early development builds: unsigned, and still being tested. Not an official Minecraft product.</p>
+      </div>
+      <div id="launcher-content"><div class="dl-grid"><div class="dl"><h3>OMNI Launcher</h3><p>Loading…</p></div></div></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>&copy; 2026 OMNIServers. Released under the GPL-3.0.</span>
+    <div class="links"><a href="downloads.html">Download</a><a href="privacy.html">Privacy</a><a href="tos.html">Terms</a><a href="https://discord.gg/SQwCjE38Jt" target="_blank" rel="noreferrer">Discord</a><a href="https://github.com/Rashica07/OMNIServers" target="_blank" rel="noreferrer">GitHub</a></div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var REPOS = ["Rashica07/OMNIServers"];
+  var CACHE_KEY = "omni_native_releases_v3";
+  var CACHE_TTL_MS = 10 * 60 * 1000;
+  var RELEASES_URL = "https://github.com/Rashica07/OMNIServers/releases";
+
+  function bytes(n) {
+    if (!n) return "";
+    var mb = n / (1024 * 1024);
+    return mb >= 1000 ? (mb / 1024).toFixed(2) + " GB" : mb.toFixed(1) + " MB";
+  }
+  function findAsset(assets, test) {
+    for (var i = 0; i < assets.length; i++) if (test(assets[i].name)) return assets[i];
+    return null;
+  }
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html !== undefined) e.innerHTML = html;
+    return e;
+  }
+  function link(text, href, cls) {
+    var a = el("a", cls || "", text);
+    a.href = href; a.rel = "noreferrer";
+    return a;
+  }
+  function newest(releases, prefix, allowPre) {
+    for (var i = 0; i < releases.length; i++) {
+      var r = releases[i];
+      if (!r.draft && (allowPre || !r.prerelease) && r.tag_name.indexOf(prefix) === 0) return r;
+    }
+    return null;
+  }
+  function versionOf(r) { return r ? r.tag_name.replace(/^[a-z]+-v/, "") : ""; }
+  function latestAsset(releases, test) {
+    for (var i = 0; i < releases.length; i++) {
+      var r = releases[i];
+      if (r.draft || r.prerelease) continue;
+      var asset = findAsset(r.assets || [], test);
+      if (asset) return { release: r, asset: asset };
+    }
+    return { release: null, asset: null };
+  }
+
+  function card(title, release, asset, o) {
+    var c = el("div", "dl");
+    c.appendChild(el("h3", "", title));
+    if (!asset) { c.appendChild(el("p", "", "Not published yet.")); return c; }
+    c.appendChild(el("div", "ver mono", "Version " + versionOf(release) + " · " + bytes(asset.size)));
+    c.appendChild(el("p", "", o.note));
+    var row = el("div", "row");
+    row.appendChild(link("Download", asset.browser_download_url, "btn " + (o.primary ? "btn-primary" : "btn-ghost")));
+    if (o.alt) row.appendChild(link(o.altLabel, o.alt.browser_download_url, "btn btn-ghost"));
+    c.appendChild(row);
+    return c;
+  }
+
+  function render(releases) {
+    // Search all published releases rather than assuming every platform is
+    // uploaded to one tag. This supports the existing platform-specific tags
+    // and future unified releases while never inventing a missing URL.
+    var macArm = latestAsset(releases, function (n) { return /(?:AppleSilicon|aarch64|arm64).*\.dmg$/i.test(n); });
+    var macIntel = latestAsset(releases, function (n) { return /(?:Intel|x86_64|x64).*\.dmg$/i.test(n); });
+    var winX64 = latestAsset(releases, function (n) { return /win-(?:x64|x86_64)\.zip$/i.test(n); });
+    var winArm = latestAsset(releases, function (n) { return /win-arm64\.zip$/i.test(n); });
+    var linX64 = latestAsset(releases, function (n) { return /linux-(?:x64|x86_64)\.(?:tar\.gz|AppImage|deb)$/i.test(n); });
+    var linArm = latestAsset(releases, function (n) { return /linux-arm64\.(?:tar\.gz|AppImage|deb)$/i.test(n); });
+    var androidApk = latestAsset(releases, function (n) { return /\.apk$/i.test(n); });
+    var androidAab = latestAsset(releases, function (n) { return /\.aab$/i.test(n); });
+    var ua = navigator.userAgent, isMac = /Mac/.test(ua), isWin = /Win/.test(ua);
+
+    var content = document.getElementById("dl-content");
+    content.innerHTML = "";
+    var grid = el("div", "dl-grid");
+    grid.appendChild(card("macOS", macArm.release, macArm.asset, {
+      primary: isMac, alt: macIntel.asset, altLabel: "Intel build",
+      note: "Apple Silicon, macOS 15 or later. The first time, right-click the app and choose Open, because this build is not notarized yet."
+    }));
+    grid.appendChild(card("Windows", winX64.release, winX64.asset, {
+      primary: isWin, alt: winArm.asset, altLabel: "ARM64 build",
+      note: "Windows 10 or 11. Unzip and run the app, nothing to install. If SmartScreen warns, choose More info, then Run anyway, because the app is not code-signed yet."
+    }));
+    grid.appendChild(card("Linux", linX64.release, linX64.asset, {
+      primary: /Linux/.test(ua) && !/Android/.test(ua), alt: linArm.asset, altLabel: "ARM64 build",
+      note: "Test build. Unpack the archive and run ./omniservers. It has had little testing on real desktops, and the tunnel and in-app updates are not in it yet."
+    }));
+    grid.appendChild(card("Android", androidApk.release, androidApk.asset, {
+      primary: /Android/.test(ua), alt: androidAab.asset, altLabel: "AAB bundle",
+      note: "APK for direct installation. The AAB is intended for app-store distribution; neither proves local Minecraft/Paper hosting."
+    }));
+    content.appendChild(grid);
+    content.appendChild(el("p", "footnote")).appendChild(link("All releases and checksums on GitHub", RELEASES_URL));
+
+    var slot = document.getElementById("version-pill-slot");
+    slot.innerHTML = "";
+    var parts = [];
+    if (macArm.release) parts.push("Mac " + versionOf(macArm.release));
+    if (winX64.release) parts.push("Windows " + versionOf(winX64.release));
+    if (linX64.release) parts.push("Linux " + versionOf(linX64.release));
+    if (androidApk.release) parts.push("Android " + versionOf(androidApk.release));
+    if (parts.length) slot.appendChild(el("span", "eyebrow mono", '<i class="status-block"></i>' + parts.join(" · ")));
+  }
+
+  function fallback() {
+    var content = document.getElementById("dl-content");
+    content.innerHTML = "";
+    var p = el("p", "lead", "The release list could not be loaded right now. ");
+    p.appendChild(link("Get it from GitHub Releases instead.", RELEASES_URL));
+    content.appendChild(p);
+  }
+
+  function fromCache() {
+    try {
+      var raw = sessionStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      var p = JSON.parse(raw);
+      return Date.now() - p.at > CACHE_TTL_MS ? null : p.releases;
+    } catch (e) { return null; }
+  }
+  function toCache(r) { try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), releases: r })); } catch (e) {} }
+
+  var cached = fromCache();
+  if (cached) render(cached);
+  Promise.all(REPOS.map(function (repo) {
+    return fetch("https://api.github.com/repos/" + repo + "/releases?per_page=30", { headers: { Accept: "application/vnd.github+json" } })
+      .then(function (r) { if (!r.ok) throw new Error(repo + " returned " + r.status); return r.json(); });
+  }))
+    .then(function (groups) {
+      var releases = [];
+      groups.forEach(function (group) { releases = releases.concat(group); });
+      releases.sort(function (a, b) { return new Date(b.published_at || b.created_at) - new Date(a.published_at || a.created_at); });
+      toCache(releases);
+      render(releases);
+    })
+    .catch(function (err) { if (!cached) fallback(); console.warn("OMNIServers downloads: release fetch failed", err); });
+})();
+
+(function () {
+  var REPO = "Rashica07/omni-launcher";
+  var box = document.getElementById("launcher-content");
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+  function mb(n) { return (n / 1048576).toFixed(1) + " MB"; }
+  var PLATFORMS = [
+    ["macOS", /macos-arm64\.zip$/i, "Apple Silicon, macOS 12 or later. Right-click the app and choose Open the first time: it is not notarized."],
+    ["Windows", /windows-x64\.zip$/i, "Windows 10 or 11, 64-bit. Unzip and run. SmartScreen may warn because the build is not code-signed."],
+    ["Linux", /linux-x64\.tar\.gz$/i, "64-bit. Unpack the archive and run ./omni-launcher."]
+  ];
+  function fail() { box.innerHTML = ""; var p = el("p", "lead", "The builds could not be loaded right now. "); var a = el("a", "", "Open GitHub Releases."); a.href = "https://github.com/" + REPO + "/releases"; a.rel = "noreferrer"; p.appendChild(a); box.appendChild(p); }
+  fetch("https://api.github.com/repos/" + REPO + "/releases?per_page=10", { headers: { Accept: "application/vnd.github+json" } })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (releases) {
+      var live = releases.filter(function (r) { return !r.draft; });
+      var grid = el("div", "dl-grid");
+      PLATFORMS.forEach(function (p) {
+        var c = el("div", "dl"); c.appendChild(el("h3", "", p[0]));
+        var hit = null;
+        live.some(function (r) { return (r.assets || []).some(function (a) { if (p[1].test(a.name)) { hit = { r: r, a: a }; return true; } }); });
+        if (!hit) { c.appendChild(el("p", "", "Not published yet.")); grid.appendChild(c); return; }
+        c.appendChild(el("div", "ver mono", hit.r.tag_name.replace(/^omni-launcher-v/, "") + " (dev) · " + mb(hit.a.size)));
+        c.appendChild(el("p", "", p[2]));
+        var row = el("div", "row"); var a = el("a", "btn btn-ghost", "Download"); a.href = hit.a.browser_download_url; a.rel = "noreferrer"; row.appendChild(a); c.appendChild(row);
+        grid.appendChild(c);
+      });
+      box.innerHTML = ""; box.appendChild(grid);
+    })
+    .catch(fail);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  CraftPanel's Sparkle appcast feed.
+
+  This is a template — no real releases are listed yet. When release CI
+  publishes a build, add an <item> here (newest first) shaped like the
+  example below, then commit this file so SUFeedURL
+  (raw.githubusercontent.com/.../main/appcast.xml, set in the Xcode
+  target's Info.plist build settings) serves it.
+
+  Each release's <enclosure> needs a real `sparkle:edSignature` — sign
+  the .zip with the private half of the Ed25519 key pair generated for
+  this app (the public half is already embedded in the app's
+  Info.plist as SUPublicEDKey). Sparkle's own `sign_update` tool (ships
+  in the Sparkle package's bin/ folder once resolved) does this:
+
+      ./sign_update /path/to/CraftPanel-2.7.0.zip
+
+  Never commit the private key — keep it in your release CI's secrets
+  (a GitHub Actions secret, matching how TAURI_SIGNING_PRIVATE_KEY is
+  already handled for the Tauri build) or a password manager.
+-->
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <title>CraftPanel</title>
+    <link>https://raw.githubusercontent.com/Rashica07/OMNIServers/main/apps/mac/appcast.xml</link>
+    <description>CraftPanel release updates</description>
+    <language>en</language>
+
+    <!--
+    <item>
+      <title>Version 2.7.0</title>
+      <pubDate>Thu, 01 Jan 2026 00:00:00 +0000</pubDate>
+      <sparkle:version>2.7.0</sparkle:version>
+      <sparkle:shortVersionString>2.7.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <ul>
+          <li>What changed in this release</li>
+        </ul>
+      ]]></description>
+      <enclosure
+        url="https://github.com/Rashica07/craftpanel/releases/download/v2.7.0/CraftPanel-2.7.0.zip"
+        sparkle:version="2.7.0"
+        sparkle:shortVersionString="2.7.0"
+        length="0"
+        type="application/octet-stream"
+        sparkle:edSignature="REPLACE_WITH_SIGN_UPDATE_OUTPUT" />
+    </item>
+    -->
+  </channel>
+</rss>

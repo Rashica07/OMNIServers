@@ -1,0 +1,187 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.AppSettingsView"
+             x:DataType="vm:AppSettingsViewModel">
+  <Grid RowDefinitions="Auto,*">
+    <Border Classes="panel" Padding="28,20,28,12"><TextBlock Text="OMNIServers settings" Classes="h1" /></Border>
+    <Grid Grid.Row="1" ColumnDefinitions="168,Auto,*">
+    <Border Classes="panel" Padding="8">
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ItemsControl ItemsSource="{Binding Tabs}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:SettingsTabItem">
+              <RadioButton Classes="side" GroupName="settingsTabs" IsChecked="{Binding IsActive, Mode=OneWay}" Command="{Binding SelectCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="9"><c:Icon Kind="{Binding Icon}" Width="14" Height="14" /><TextBlock Text="{Binding Label}" /></StackPanel>
+              </RadioButton>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Border>
+    <Border Grid.Column="1" Width="1" Background="{DynamicResource Cp.LineSoft}" />
+
+    <ScrollViewer Grid.Column="2">
+      <Grid Margin="28,22" MaxWidth="700" HorizontalAlignment="Center">
+        <!-- ============ General ============ -->
+        <StackPanel Spacing="16" IsVisible="{Binding IsGeneral}">
+          <c:Card Title="Appearance" Icon="palette" Description="Pick the look you like.">
+            <ItemsControl ItemsSource="{Binding Themes}">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ThemeChoice">
+                  <Button Classes="ghost" Height="NaN" Width="140" Padding="10" Margin="0,0,10,10" Command="{Binding $parent[UserControl].((vm:AppSettingsViewModel)DataContext).SelectTheme}" CommandParameter="{Binding}" BorderThickness="2" Classes.sel="{Binding Selected}">
+                    <StackPanel Spacing="8">
+                      <Border Height="46" CornerRadius="6" Background="{Binding Bg}" Padding="6">
+                        <Grid ColumnDefinitions="*,Auto"><Border Background="{Binding Surface}" CornerRadius="4" Margin="0,0,6,0" /><Border Grid.Column="1" Width="16" Background="{Binding Accent}" CornerRadius="4" /></Grid>
+                      </Border>
+                      <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Label}" FontWeight="Medium" /><c:Icon Grid.Column="1" Kind="lock" Width="13" Height="13" IsVisible="{Binding Locked}" Foreground="{DynamicResource Cp.InkFaint}" /><c:Icon Grid.Column="1" Kind="check" Width="14" Height="14" IsVisible="{Binding Selected}" Foreground="{DynamicResource Cp.Accent}" /></Grid>
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </c:Card>
+
+          <c:Card Title="Updates" Icon="download" Description="New versions come from the OMNIServers releases page on GitHub. OMNIServers restarts to finish.">
+            <StackPanel Spacing="10">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="primary" Content="Check for updates" Command="{Binding CheckUpdateCommand}" />
+                <Button Classes="ghost" Content="{Binding InstallUpdateLabel}" Command="{Binding InstallUpdateCommand}" IsVisible="{Binding CanInstallUpdate}" />
+              </StackPanel>
+              <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding UpdateBusy}" />
+              <TextBlock Text="{Binding UpdateStatus}" Classes="dim small" TextWrapping="Wrap" />
+              <c:SettingRow Title="Check automatically" Hint="Looks for a new version when OMNIServers opens."><ToggleSwitch IsChecked="{Binding AutoCheckUpdates, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+            </StackPanel>
+          </c:Card>
+
+          <c:Card Title="Performance" Icon="gauge" Description="Light mode makes OMNIServers do less in the background, which helps on slow, small or remote PCs.">
+            <StackPanel Spacing="8">
+              <ComboBox ItemsSource="{x:Static vm:AppSettingsViewModel.LightChoices}" SelectedIndex="{Binding LightIndex, Mode=TwoWay}" MinWidth="240" HorizontalAlignment="Left" />
+              <TextBlock Text="{Binding LightStatus}" Classes="dim small" TextWrapping="Wrap" />
+            </StackPanel>
+          </c:Card>
+
+          <c:Card Title="Defaults for new servers" Icon="sliders">
+            <StackPanel Spacing="16">
+              <c:RamPicker RamMB="{Binding DefaultRam, Mode=TwoWay}" ShowPlayers="False" Follow="False" Kind="VanillaLike" />
+              <c:Field Label="Default java" Hint="java = let OMNIServers pick (and install) a matching one."><TextBox Classes="mono" Text="{Binding DefaultJava, Mode=TwoWay}" /></c:Field>
+              <c:SettingRow Title="Keep servers running when I quit OMNIServers" Hint="Quitting won't stop your servers — the app re-adopts them next launch."><ToggleSwitch IsChecked="{Binding KeepOnQuit, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+              <c:SettingRow Title="Stay awake" Hint="Stops this computer sleeping on its own while OMNIServers is open, so scheduled starts and friends' connections keep working." IsVisible="{Binding KeepAwakeSupported}"><ToggleSwitch IsChecked="{Binding StayAwake, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+              <c:SettingRow Title="Keep running with the lid closed" Hint="Laptops normally sleep when you close the lid, which stops the server. This changes the lid action to Do nothing while it is on, and restores your old setting when you turn it off. Leave the laptop plugged in and somewhere it can breathe." IsVisible="{Binding KeepAwakeSupported}"><ToggleSwitch IsChecked="{Binding KeepLidClosed, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+              <c:SettingRow Title="Expert mode" Hint="Shows the raw server.properties editor and other power tools."><ToggleSwitch IsChecked="{Binding Expert, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+            </StackPanel>
+          </c:Card>
+
+          <c:Card Title="Players &amp; chat" Icon="message-circle">
+            <StackPanel Spacing="16">
+              <c:SettingRow Title="Tell me when players join or leave" Hint="A pop-up in the corner of OMNIServers, and a notification from the tray when it's minimised. Advancements too."><ToggleSwitch IsChecked="{Binding NotifyJoins, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+              <c:SettingRow Title="Also notify for every chat message" Hint="Can get noisy on a busy server."><ToggleSwitch IsChecked="{Binding NotifyChat, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+              <c:Field Label="Your name in chat" Hint="{Binding ChatNameHint}"><TextBox Text="{Binding ChatName, Mode=TwoWay}" PlaceholderText="Host" /></c:Field>
+            </StackPanel>
+          </c:Card>
+        </StackPanel>
+
+        <!-- ============ Account ============ -->
+        <StackPanel Spacing="16" IsVisible="{Binding IsAccount}">
+          <c:Card Title="This install" Icon="user" Description="A random id for this install of OMNIServers — not you, not your servers' content. Nothing leaves this PC on its own.">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><Border Background="{DynamicResource Cp.Surface3}" CornerRadius="6" Padding="12,8"><SelectableTextBlock Text="{Binding InstallId}" Classes="mono" /></Border><Button Grid.Column="1" Classes="ghost" Content="Copy" Command="{Binding CopyCommand}" CommandParameter="{Binding InstallId}" /></Grid>
+          </c:Card>
+          <c:Card Title="App lock" Icon="lock" Description="Ask for a PIN or password every time OMNIServers opens. It's stored as an Argon2id hash — never the PIN itself.">
+            <StackPanel Spacing="12">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="primary" Content="Set or change PIN" Command="{Binding SetPinCommand}" />
+                <Button Classes="ghost" Content="Turn off" Command="{Binding RemovePinCommand}" IsVisible="{Binding LockSet}" />
+              </StackPanel>
+              <TextBlock Text="{Binding LockMessage}" Classes="dim" IsVisible="{Binding HasLockMessage}" TextWrapping="Wrap" />
+            </StackPanel>
+          </c:Card>
+        </StackPanel>
+
+        <!-- ============ Java ============ -->
+        <StackPanel Spacing="16" IsVisible="{Binding IsJava}">
+          <c:Card Title="Java on this PC" Icon="cpu" Description="Minecraft servers run on Java. OMNIServers finds the ones you have and can install verified Eclipse Temurin runtimes for you.">
+            <c:Card.Actions><Button Classes="ghost sm" Content="Refresh" Command="{Binding RefreshJavaCommand}" /></c:Card.Actions>
+            <StackPanel Spacing="8">
+              <TextBlock Text="{Binding JavaMessage}" Classes="dim" IsVisible="{Binding HasJavaMessage}" TextWrapping="Wrap" />
+              <ItemsControl ItemsSource="{Binding Runtimes}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:RuntimeRow">
+                    <Border Padding="0,8" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="0,0,0,1"><StackPanel Spacing="2"><TextBlock Text="{Binding Title}" FontWeight="SemiBold" /><TextBlock Text="{Binding Path}" Classes="mono faint small" TextTrimming="CharacterEllipsis" /></StackPanel></Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </c:Card>
+          <c:Card Title="Install a runtime" Icon="cloud-download" Description="Java 25 for Minecraft 26.x, 21 for 1.20.5–1.21.x, 17 for 1.18–1.20.4.">
+            <ItemsControl ItemsSource="{Binding Features}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:UInt32">
+                  <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Margin="0,5">
+                    <TextBlock Text="{Binding StringFormat='Eclipse Temurin {0}'}" VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Classes="primary sm" Content="Install" Command="{Binding $parent[UserControl].((vm:AppSettingsViewModel)DataContext).InstallJavaCommand}" CommandParameter="{Binding}" />
+                    <Button Grid.Column="2" Classes="ghost sm" Content="Remove" Command="{Binding $parent[UserControl].((vm:AppSettingsViewModel)DataContext).RemoveJavaCommand}" CommandParameter="{Binding}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </c:Card>
+        </StackPanel>
+
+        <!-- ============ Backups ============ -->
+        <StackPanel Spacing="16" IsVisible="{Binding IsBackups}">
+          <c:Card Title="Backup retention" Icon="archive" Description="Applies to every server after each new backup. Backups made just before a restore are never removed.">
+            <StackPanel Spacing="16">
+              <c:SettingRow Title="Keep the newest" Hint="Ignored when smart retention is on."><NumericUpDown Value="{Binding BackupKeep, Mode=TwoWay}" Minimum="1" Maximum="200" FormatString="0" Width="110" /></c:SettingRow>
+              <c:SettingRow Title="Smart retention" Hint="Keep everything from the last day, then the newest of each day for a week."><ToggleSwitch IsChecked="{Binding Tiered, Mode=TwoWay}" OnContent="" OffContent="" /></c:SettingRow>
+            </StackPanel>
+          </c:Card>
+        </StackPanel>
+
+        <!-- ============ Diagnostics ============ -->
+        <StackPanel Spacing="16" IsVisible="{Binding IsDiagnostics}">
+          <c:Card Title="Health check" Icon="activity" Description="Java, disk space, ports, network.">
+            <c:Card.Actions><Button Classes="ghost sm" Content="Run again" Command="{Binding RunChecksCommand}" /></c:Card.Actions>
+            <StackPanel Spacing="4">
+              <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding Checking}" />
+              <ItemsControl ItemsSource="{Binding Checks}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:CheckRow">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Margin="0,7">
+                      <c:Icon Kind="{Binding Icon}" Width="17" Height="17" VerticalAlignment="Top" Foreground="{DynamicResource Cp.InkDim}" />
+                      <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="{Binding Name}" FontWeight="SemiBold" /><TextBlock Text="{Binding Detail}" Classes="dim small" TextWrapping="Wrap" /></StackPanel>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </c:Card>
+          <c:Card Title="Something not working?" Icon="alert" Description="Save a report with what's on this PC, the error log and a server's console. Names, IP addresses and passwords are removed. Send it to whoever is helping you.">
+            <Button Classes="primary" Content="Report a problem…" Command="{Binding ReportProblemCommand}" HorizontalAlignment="Left" />
+          </c:Card>
+        </StackPanel>
+
+        <!-- ============ About ============ -->
+        <StackPanel Spacing="16" IsVisible="{Binding IsAbout}">
+          <c:Card Title="OMNIServers" Icon="info">
+            <StackPanel Spacing="12">
+              <StackPanel Orientation="Horizontal" Spacing="14"><Image Source="avares://CraftPanel/Assets/glyph.png" Width="48" Height="48" /><StackPanel VerticalAlignment="Center"><TextBlock Text="OMNIServers for Windows" Classes="h3" /><TextBlock Text="{Binding Version, StringFormat='Version {0}'}" Classes="faint" /></StackPanel></StackPanel>
+              <c:Field Label="Your data"><StackPanel Orientation="Horizontal" Spacing="8"><SelectableTextBlock Text="{Binding DataFolder}" Classes="mono dim small" VerticalAlignment="Center" /><Button Classes="ghost sm" Content="Open" Command="{Binding OpenDataCommand}" /></StackPanel></c:Field>
+              <Button Classes="ghost" Content="Open the servers folder" Command="{Binding OpenServersCommand}" HorizontalAlignment="Left" />
+              <StackPanel Orientation="Horizontal" Spacing="8"><Button Classes="ghost" Content="Join the Discord" Command="{Binding OpenDiscordCommand}" /><Button Classes="ghost" Content="Source code (GPL-3.0)" Command="{Binding OpenSourceCommand}" /></StackPanel>
+            </StackPanel>
+          </c:Card>
+          <c:Card Title="Credits" Icon="heart">
+            <StackPanel Spacing="6">
+              <TextBlock Text="Built with Avalonia UI (MIT). Icons from Lucide (ISC). Space Grotesk (SIL OFL 1.1)." Classes="dim" TextWrapping="Wrap" />
+              <TextBlock Text="Live maps by BlueMap (MIT). Java runtimes from Eclipse Temurin (GPLv2 + Classpath Exception). Mods and modpacks from Modrinth." Classes="dim" TextWrapping="Wrap" />
+              <TextBlock Text="OMNIServers is not affiliated with Mojang or Microsoft. Minecraft is a trademark of Mojang Synergies AB." Classes="faint small" TextWrapping="Wrap" />
+            </StackPanel>
+          </c:Card>
+        </StackPanel>
+      </Grid>
+    </ScrollViewer>
+    </Grid>
+  </Grid>
+</UserControl>

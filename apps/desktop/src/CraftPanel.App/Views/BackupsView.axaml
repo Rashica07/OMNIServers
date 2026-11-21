@@ -1,0 +1,94 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.BackupsView"
+             x:DataType="vm:BackupsViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="24,20" Spacing="16" MaxWidth="760" HorizontalAlignment="Center">
+      <c:Card Title="Back up now" Icon="archive" Description="A zip of the world, configs, mods and plugins. A running server is paused for a moment so the copy is consistent.">
+        <StackPanel Spacing="12">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox Text="{Binding Label, Mode=TwoWay}" PlaceholderText="Optional label — e.g. before the big update" />
+            <Button Grid.Column="1" Classes="primary" Command="{Binding BackupNowCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="7"><c:Icon Kind="save" Width="14" Height="14" /><TextBlock Text="Back up now" Foreground="{DynamicResource Cp.OnAccent}" /></StackPanel>
+            </Button>
+          </Grid>
+          <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasStatus}"><ProgressBar IsIndeterminate="True" Width="60" Height="4" IsVisible="{Binding Busy}" /><TextBlock Text="{Binding Status}" Classes="dim" /></StackPanel>
+          <c:SettingRow Title="Keep the newest" Hint="Older automatic and manual backups are removed after each new one. Pre-restore and imported backups are never removed.">
+            <NumericUpDown Value="{Binding Keep, Mode=TwoWay}" Minimum="1" Maximum="200" FormatString="0" Width="110" />
+          </c:SettingRow>
+        </StackPanel>
+      </c:Card>
+
+      <c:Card Title="Time Machine" Icon="history" Description="{Binding SnapshotHint}">
+        <StackPanel Spacing="2">
+          <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+            <Button Classes="primary" Command="{Binding SnapshotNowCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="7"><c:Icon Kind="history" Width="14" Height="14" /><TextBlock Text="Snapshot now" Foreground="{DynamicResource Cp.OnAccent}" /></StackPanel>
+            </Button>
+          </StackPanel>
+          <c:EmptyState Icon="history" Title="No snapshots yet" Message="Take one above, or set an automatic schedule in Settings." IsVisible="{Binding NoSnapshots}" />
+          <ItemsControl ItemsSource="{Binding Snapshots}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SnapshotRow">
+                <Border Padding="0,10" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="0,0,0,1">
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <StackPanel Spacing="3">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding When}" FontWeight="SemiBold" />
+                        <Border Classes="badge" IsVisible="{Binding IsScheduled}"><TextBlock Text="scheduled" /></Border>
+                        <Border Classes="badge warn" IsVisible="{Binding IsLegacy}" ToolTip.Tip="Taken by an older version: it holds the whole server folder, not just the world."><TextBlock Text="whole server" /></Border>
+                      </StackPanel>
+                      <TextBlock Text="{Binding Detail}" Classes="faint small" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                      <Button Classes="ghost sm" Content="Restore" Command="{Binding $parent[UserControl].((vm:BackupsViewModel)DataContext).RestoreSnapshotCommand}" CommandParameter="{Binding Id}" />
+                      <Button Classes="danger sm square" ToolTip.Tip="Delete" Command="{Binding $parent[UserControl].((vm:BackupsViewModel)DataContext).DeleteSnapshotCommand}" CommandParameter="{Binding Id}"><c:Icon Kind="trash" Width="13" Height="13" /></Button>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </c:Card>
+
+      <c:Card Title="Your backups" Icon="clock" Description="{Binding TotalSize, StringFormat='Total size: {0}. Got a backup from a friend? Import it, then restore it.'}">
+        <c:Card.Actions>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Classes="ghost sm" Command="{Binding ImportCommand}" Content="Import backup…" ToolTip.Tip="Add a backup someone else made (their .zip and .json) to this server" />
+            <Button Classes="ghost sm" Command="{Binding OpenFolderCommand}" Content="Open folder" />
+          </StackPanel>
+        </c:Card.Actions>
+        <StackPanel Spacing="2">
+          <c:EmptyState Icon="archive" Title="No backups yet" Message="Make your first one above." IsVisible="{Binding IsEmpty}" />
+          <ItemsControl ItemsSource="{Binding Backups}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:BackupRow">
+                <Border Padding="0,10" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="0,0,0,1">
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                    <StackPanel Spacing="3">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                        <Border Classes="badge accent" IsVisible="{Binding IsImported}"><TextBlock Text="imported" /></Border>
+                        <Border Classes="badge ok" IsVisible="{Binding IsVerified}"><TextBlock Text="verified" /></Border>
+                        <Border Classes="badge bad" IsVisible="{Binding IsBad}"><TextBlock Text="damaged" /></Border>
+                      </StackPanel>
+                      <TextBlock Classes="faint small"><Run Text="{Binding When}" /><Run Text="  ·  " /><Run Text="{Binding Size}" /></TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                      <Button Classes="ghost sm" Content="Verify" Command="{Binding $parent[UserControl].((vm:BackupsViewModel)DataContext).VerifyCommand}" CommandParameter="{Binding Id}" />
+                      <Button Classes="ghost sm" Content="Restore" Command="{Binding $parent[UserControl].((vm:BackupsViewModel)DataContext).RestoreCommand}" CommandParameter="{Binding Id}" />
+                      <Button Classes="danger sm square" ToolTip.Tip="Delete" Command="{Binding $parent[UserControl].((vm:BackupsViewModel)DataContext).DeleteCommand}" CommandParameter="{Binding Id}"><c:Icon Kind="trash" Width="13" Height="13" /></Button>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </c:Card>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

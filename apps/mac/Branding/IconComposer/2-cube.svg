@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<g transform="translate(100 100) scale(0.8046875)"><polygon points="512.0,150.0 762.0,295.0 512.0,440.0 262.0,295.0" fill="#FFA84F" stroke="#FFA84F" stroke-width="18" stroke-linejoin="round"/>
+<polygon points="262.0,295.0 512.0,440.0 512.0,725.0 262.0,580.0" fill="#FF8C0A" stroke="#FF8C0A" stroke-width="18" stroke-linejoin="round"/>
+<polygon points="512.0,440.0 762.0,295.0 762.0,580.0 512.0,725.0" fill="#E27708" stroke="#E27708" stroke-width="18" stroke-linejoin="round"/>
+<line x1="387.0" y1="222.5" x2="637.0" y2="367.5" stroke="#E07A00" stroke-width="16" stroke-linecap="round"/>
+<line x1="637.0" y1="222.5" x2="387.0" y2="367.5" stroke="#E07A00" stroke-width="16" stroke-linecap="round"/>
+<line x1="387.0" y1="367.5" x2="387.0" y2="652.5" stroke="#D46C00" stroke-width="16" stroke-linecap="round"/>
+<line x1="262.0" y1="437.5" x2="512.0" y2="582.5" stroke="#D46C00" stroke-width="16" stroke-linecap="round"/>
+<line x1="637.0" y1="367.5" x2="637.0" y2="652.5" stroke="#BF6200" stroke-width="16" stroke-linecap="round"/>
+<line x1="762.0" y1="437.5" x2="512.0" y2="582.5" stroke="#BF6200" stroke-width="16" stroke-linecap="round"/></g>
+</svg>

@@ -1,0 +1,92 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftPanel.App.ViewModels"
+        xmlns:h="using:CraftPanel.Core.Help"
+        x:Class="CraftPanel.App.Views.HelpWindow"
+        x:DataType="vm:HelpViewModel"
+        Title="OMNIServers Help" Width="920" Height="660" MinWidth="680" MinHeight="460" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <Grid RowDefinitions="Auto,*">
+    <!-- mode bar -->
+    <Border Classes="panel" Padding="18,14">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2">
+          <TextBlock Text="Help &amp; tutorials" Classes="h1" />
+          <TextBlock Text="{Binding PageHeading}" Classes="faint small" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <RadioButton Classes="tab" GroupName="helpmode" Content="This page" IsChecked="{Binding IsPage, Mode=OneWay}" Command="{Binding ShowPageCommand}" />
+          <RadioButton Classes="tab" GroupName="helpmode" Content="Full tutorial" IsChecked="{Binding IsTour, Mode=OneWay}" Command="{Binding ShowTourCommand}" />
+          <RadioButton Classes="tab" GroupName="helpmode" Content="How do I…?" IsChecked="{Binding IsLibrary, Mode=OneWay}" Command="{Binding ShowLibraryCommand}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- topics + viewer -->
+    <Grid Grid.Row="1" ColumnDefinitions="300,1,*" IsVisible="{Binding ShowsTopics}">
+      <Grid RowDefinitions="Auto,*">
+        <TextBox Text="{Binding Query, Mode=TwoWay}" PlaceholderText="Search: op, world, backup, wifi…" Margin="12,12,12,6" IsVisible="{Binding IsLibrary}" />
+        <TextBlock Grid.Row="1" Text="Nothing matches that. Try a simpler word." Classes="dim" Margin="16,12" TextWrapping="Wrap" IsVisible="{Binding NoTopics}" />
+        <ListBox Grid.Row="1" Classes="plain" ItemsSource="{Binding Topics}" SelectedItem="{Binding Selected, Mode=TwoWay}" Margin="8,4">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="h:HelpTopic">
+              <StackPanel Margin="10,8" Spacing="2">
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Summary}" Classes="faint small" TextWrapping="Wrap" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+      <Border Grid.Column="1" Classes="vrule" />
+      <ScrollViewer Grid.Column="2">
+        <StackPanel Margin="26,22" Spacing="16" IsVisible="{Binding HasSelected}">
+          <StackPanel Spacing="4">
+            <TextBlock Text="{Binding TopicTitle}" Classes="h1" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding TopicSummary}" Classes="dim" TextWrapping="Wrap" />
+          </StackPanel>
+          <ItemsControl ItemsSource="{Binding Steps}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:StepRow">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Margin="0,0,0,12">
+                  <Border Classes="badge accent" VerticalAlignment="Top" MinWidth="26" HorizontalAlignment="Center"><TextBlock Text="{Binding Number}" HorizontalAlignment="Center" /></Border>
+                  <StackPanel Grid.Column="1" Spacing="6">
+                    <TextBlock Text="{Binding Text}" TextWrapping="Wrap" />
+                    <Button Classes="ghost sm" Content="{Binding ActionLabel}" IsVisible="{Binding HasAction}" HorizontalAlignment="Left"
+                            Command="{Binding $parent[Window].((vm:HelpViewModel)DataContext).RunActionCommand}" CommandParameter="{Binding Action}" />
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Border Classes="banner" IsVisible="{Binding HasNotes}">
+            <StackPanel Spacing="4">
+              <TextBlock Text="Good to know" FontWeight="SemiBold" />
+              <ItemsControl ItemsSource="{Binding Notes}">
+                <ItemsControl.ItemTemplate><DataTemplate x:DataType="x:String"><TextBlock Text="{Binding StringFormat='•  {0}'}" TextWrapping="Wrap" Classes="dim" Margin="0,2" /></DataTemplate></ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <!-- tour -->
+    <Grid Grid.Row="1" IsVisible="{Binding IsTour}" RowDefinitions="Auto,*,Auto" Margin="40,28">
+      <StackPanel Spacing="8">
+        <TextBlock Text="{Binding TourProgress}" Classes="faint small" />
+        <ProgressBar Value="{Binding TourFraction}" Minimum="0" Maximum="1" Height="4" />
+      </StackPanel>
+      <StackPanel Grid.Row="1" Spacing="14" VerticalAlignment="Center" MaxWidth="640" HorizontalAlignment="Center">
+        <TextBlock Text="{Binding TourTitle}" Classes="h1" FontSize="26" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding TourText}" FontSize="15" TextWrapping="Wrap" LineHeight="23" />
+        <Button Classes="ghost" Content="{Binding TourActionLabel}" IsVisible="{Binding TourHasAction}" HorizontalAlignment="Left"
+                Command="{Binding RunActionCommand}" CommandParameter="{Binding TourAction}" />
+      </StackPanel>
+      <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+        <Button Classes="ghost" Content="Skip tour" Command="{Binding CloseCommand}" />
+        <Button Grid.Column="2" Classes="ghost" Content="Back" Command="{Binding BackCommand}" MinWidth="84" />
+        <Button Grid.Column="3" Classes="primary" Content="{Binding NextLabel}" Command="{Binding NextCommand}" MinWidth="96" />
+      </Grid>
+    </Grid>
+  </Grid>
+</Window>

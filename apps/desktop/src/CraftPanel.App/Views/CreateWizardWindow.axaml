@@ -1,0 +1,179 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftPanel.App.ViewModels"
+        xmlns:c="using:CraftPanel.App.Controls"
+        x:Class="CraftPanel.App.Views.CreateWizardWindow"
+        x:DataType="vm:CreateWizardViewModel"
+        Title="New server" Width="700" Height="780" MinWidth="560" MinHeight="560"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+<Window.Styles>
+    <Style Selector="StackPanel.step[IsVisible=True]">
+      <Style.Animations>
+        <Animation Duration="0:0:0.28" Easing="CubicEaseOut">
+          <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+  </Window.Styles>
+  <Grid RowDefinitions="Auto,*,Auto">
+    <!-- header -->
+    <Border Classes="panel" Padding="24,18,24,14">
+      <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+        <Button Classes="ghost square" Command="{Binding BackCommand}" IsVisible="{Binding CanGoBack}" ToolTip.Tip="Back" VerticalAlignment="Top"><c:Icon Kind="arrow-left" /></Button>
+        <StackPanel Grid.Column="1" Spacing="8">
+          <StackPanel Orientation="Horizontal" Spacing="18" IsVisible="{Binding ShowSteps}">
+            <TextBlock Text="1  Type" Classes="faint" Opacity="{Binding Op1}" />
+            <TextBlock Text="2  Version" Classes="faint" Opacity="{Binding Op2}" />
+            <TextBlock Text="3  Setup" Classes="faint" Opacity="{Binding Op3}" />
+          </StackPanel>
+          <StackPanel Spacing="3"><TextBlock Text="{Binding StepTitle}" Classes="h1" /><TextBlock Text="{Binding StepHint}" Classes="faint" TextWrapping="Wrap" /></StackPanel>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <ScrollViewer Grid.Row="1">
+      <Grid Margin="24,18">
+        <!-- loader -->
+        <StackPanel Classes="step" Spacing="10" IsVisible="{Binding IsLoaderStep}">
+          <ItemsControl Margin="0,0,-10,0" ItemsSource="{x:Static vm:CreateWizardViewModel.LoaderChoices}">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:LoaderChoice">
+                <Button Classes="ghost" Height="NaN" MinHeight="150" Padding="14" Margin="0,0,10,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                        Command="{Binding $parent[Window].((vm:CreateWizardViewModel)DataContext).PickLoaderCommand}" CommandParameter="{Binding}">
+                  <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="8">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                      <Border Width="30" Height="30" CornerRadius="8" Background="{DynamicResource Cp.AccentMuted}"><c:Icon Kind="{Binding Icon}" Width="16" Height="16" Foreground="{DynamicResource Cp.Accent}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                      <TextBlock Grid.Column="1" Text="{Binding Label}" Classes="h3" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                      <Border Grid.Column="2" Classes="badge" IsVisible="{Binding Recommended}" VerticalAlignment="Center"><TextBlock Text="Recommended" /></Border>
+                    </Grid>
+                    <TextBlock Grid.Row="1" Text="{Binding Blurb}" Classes="faint small" TextWrapping="Wrap" HorizontalAlignment="Left" />
+                    <UniformGrid Grid.Row="2" Columns="5" Height="4" IsVisible="{Binding IsMinecraft}">
+                      <Border CornerRadius="2" Margin="0,0,3,0" Background="{DynamicResource Cp.Surface3}"><Border CornerRadius="2" Background="{DynamicResource Cp.Accent}" IsVisible="{Binding Bar1}" /></Border>
+                      <Border CornerRadius="2" Margin="0,0,3,0" Background="{DynamicResource Cp.Surface3}"><Border CornerRadius="2" Background="{DynamicResource Cp.Accent}" IsVisible="{Binding Bar2}" /></Border>
+                      <Border CornerRadius="2" Margin="0,0,3,0" Background="{DynamicResource Cp.Surface3}"><Border CornerRadius="2" Background="{DynamicResource Cp.Accent}" IsVisible="{Binding Bar3}" /></Border>
+                      <Border CornerRadius="2" Margin="0,0,3,0" Background="{DynamicResource Cp.Surface3}"><Border CornerRadius="2" Background="{DynamicResource Cp.Accent}" IsVisible="{Binding Bar4}" /></Border>
+                      <Border CornerRadius="2" Background="{DynamicResource Cp.Surface3}"><Border CornerRadius="2" Background="{DynamicResource Cp.Accent}" IsVisible="{Binding Bar5}" /></Border>
+                    </UniformGrid>
+                    <TextBlock Grid.Row="2" Grid.RowSpan="2" Text="{Binding Note}" Classes="faint tiny" VerticalAlignment="Bottom" HorizontalAlignment="Left" IsVisible="{Binding IsGame}" />
+                    <Grid Grid.Row="3" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12" IsVisible="{Binding IsMinecraft}">
+                      <TextBlock Text="Speed" Classes="faint tiny" />
+                      <TextBlock Grid.Column="1" Text="{Binding PluginsText}" Classes="faint tiny" />
+                      <TextBlock Grid.Column="2" Text="{Binding ModsText}" Classes="faint tiny" />
+                    </Grid>
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Border Classes="rule" Margin="0,6" />
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Button Classes="ghost lg" HorizontalAlignment="Stretch" Command="{Binding SwitchToTemplatesCommand}"><StackPanel Orientation="Horizontal" Spacing="8"><c:Icon Kind="zap" /><TextBlock Text="Quick start (Skyblock, Bedwars…)" /></StackPanel></Button>
+            <Button Grid.Column="1" Classes="ghost lg" HorizontalAlignment="Stretch" Command="{Binding SwitchToModpacksCommand}"><StackPanel Orientation="Horizontal" Spacing="8"><c:Icon Kind="package" /><TextBlock Text="Browse modpacks" /></StackPanel></Button>
+          </Grid>
+        </StackPanel>
+
+        <!-- version -->
+        <StackPanel Classes="step" Spacing="10" IsVisible="{Binding IsVersionStep}">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <TextBox Text="{Binding VersionQuery, Mode=TwoWay}" PlaceholderText="Search versions…" />
+            <CheckBox Grid.Column="1" IsChecked="{Binding ShowUnstable, Mode=TwoWay}" Content="Snapshots &amp; betas" />
+          </Grid>
+          <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding LoadingVersions}" />
+          <ItemsControl ItemsSource="{Binding Versions}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:VersionRow">
+                <Button Classes="quiet" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,0"
+                        Command="{Binding $parent[Window].((vm:CreateWizardViewModel)DataContext).PickVersionCommand}" CommandParameter="{Binding}">
+                  <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{Binding Id}" Foreground="{DynamicResource Cp.Ink}" VerticalAlignment="Center" /><Border Grid.Column="1" Classes="badge" IsVisible="{Binding !IsStable}"><TextBlock Text="{Binding Kind}" /></Border></Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- modpacks -->
+        <StackPanel Classes="step" Spacing="10" IsVisible="{Binding IsModpackStep}">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox Name="PackSearch" Text="{Binding PackQuery, Mode=TwoWay}" PlaceholderText="Search modpacks…" />
+            <Button Grid.Column="1" Classes="primary" Content="Search" Command="{Binding SearchPacksCommand}" />
+          </Grid>
+          <ProgressBar IsIndeterminate="True" Height="3" IsVisible="{Binding LoadingPacks}" />
+          <ItemsControl ItemsSource="{Binding Packs}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:PackRow">
+                <Button Classes="ghost" Height="NaN" Padding="12" Margin="0,0,0,8" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                        Command="{Binding $parent[Window].((vm:CreateWizardViewModel)DataContext).PickPackCommand}" CommandParameter="{Binding}">
+                  <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <Border Width="48" Height="48" CornerRadius="9" Background="{DynamicResource Cp.Surface3}" ClipToBounds="True"><Image Source="{Binding Icon}" Stretch="UniformToFill" IsVisible="{Binding HasIcon}" /></Border>
+                    <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="{Binding Title}" Classes="h3" HorizontalAlignment="Left" /><TextBlock Text="{Binding Description}" Classes="dim small" TextWrapping="Wrap" MaxLines="2" HorizontalAlignment="Left" /><TextBlock Text="{Binding Downloads}" Classes="ghost tiny" HorizontalAlignment="Left" /></StackPanel>
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <!-- templates -->
+        <StackPanel Classes="step" Spacing="8" IsVisible="{Binding IsTemplateStep}">
+          <ItemsControl ItemsSource="{x:Static vm:CreateWizardViewModel.Templates}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:TemplateChoice">
+                <Button Classes="ghost" Height="NaN" Padding="14,12" Margin="0,0,0,8" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                        Command="{Binding $parent[Window].((vm:CreateWizardViewModel)DataContext).PickTemplateCommand}" CommandParameter="{Binding}">
+                  <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                    <c:Icon Kind="{Binding Icon}" Width="22" Height="22" Foreground="{DynamicResource Cp.Accent}" VerticalAlignment="Top" Margin="0,2,0,0" />
+                    <StackPanel Grid.Column="1" Spacing="2"><TextBlock Text="{Binding Label}" Classes="h3" HorizontalAlignment="Left" /><TextBlock Text="{Binding Blurb}" Classes="faint" TextWrapping="Wrap" HorizontalAlignment="Left" /></StackPanel>
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Text="Click one, then Next." Classes="faint small" />
+        </StackPanel>
+
+        <!-- details -->
+        <StackPanel Spacing="16" IsVisible="{Binding IsDetailsStep}">
+          <Border Classes="banner bad" IsVisible="{Binding HasError}"><TextBlock Text="{Binding Error}" Classes="bad" TextWrapping="Wrap" /></Border>
+          <c:Card Title="Setup" Icon="sliders">
+            <StackPanel Spacing="14">
+              <c:Field Label="Name"><TextBox Text="{Binding Name, Mode=TwoWay}" PlaceholderText="My server" /></c:Field>
+              <c:Field Label="Location"><Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><TextBox Text="{Binding Location, Mode=OneWay}" IsReadOnly="True" Classes="mono" FontSize="12" /><Button Grid.Column="1" Classes="ghost" Content="Change…" Command="{Binding BrowseLocationCommand}" /></Grid></c:Field>
+              <c:Field Label="Java" IsVisible="{Binding IsMinecraftServer}" Hint="Leave as-is — OMNIServers picks a matching Java, and installs one if you have none."><TextBox Text="{Binding Java, Mode=TwoWay}" Classes="mono" FontSize="12" /></c:Field>
+            </StackPanel>
+          </c:Card>
+          <c:Card Title="Memory" Icon="memory" IsVisible="{Binding IsMinecraftServer}">
+            <c:RamPicker RamMB="{Binding RamMB, Mode=TwoWay}" Players="{Binding Players, Mode=TwoWay}" Kind="{Binding RamKind}" Follow="{Binding Follow, Mode=TwoWay}" />
+          </c:Card>
+          <c:Card Title="Your world" Icon="globe" IsVisible="{Binding ShowWorldSettings}">
+            <StackPanel Spacing="14">
+              <c:Field Label="Seed" Hint="Blank = random"><TextBox Text="{Binding Seed, Mode=TwoWay}" /></c:Field>
+              <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <c:Field Label="Gamemode"><ComboBox ItemsSource="{x:Static vm:CreateWizardViewModel.Gamemodes}" SelectedItem="{Binding Gamemode, Mode=TwoWay}" HorizontalAlignment="Stretch" /></c:Field>
+                <c:Field Grid.Column="1" Label="Difficulty"><ComboBox ItemsSource="{x:Static vm:CreateWizardViewModel.Difficulties}" SelectedItem="{Binding Difficulty, Mode=TwoWay}" HorizontalAlignment="Stretch" /></c:Field>
+                <c:Field Grid.Column="2" Label="Max players"><NumericUpDown Value="{Binding MaxPlayers, Mode=TwoWay}" Minimum="1" Maximum="1000" FormatString="0" /></c:Field>
+              </Grid>
+              <c:Field Label="Message of the day" Hint="Shown in your friends' server list."><TextBox Text="{Binding Motd, Mode=TwoWay}" PlaceholderText="A Minecraft Server" /></c:Field>
+            </StackPanel>
+          </c:Card>
+        </StackPanel>
+
+        <!-- working -->
+        <StackPanel Spacing="16" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="440" IsVisible="{Binding IsWorkingStep}">
+          <Image Source="avares://CraftPanel/Assets/glyph.png" Width="72" Height="72" />
+          <TextBlock Text="{Binding Message}" Classes="h3" TextAlignment="Center" TextWrapping="Wrap" />
+          <ProgressBar IsIndeterminate="{Binding Indeterminate}" Value="{Binding PctValue}" Minimum="0" Maximum="100" Width="320" />
+          <TextBlock Text="Downloading and setting things up. You can leave this window open — it closes by itself when the server is ready." Classes="faint small" TextAlignment="Center" TextWrapping="Wrap" />
+        </StackPanel>
+      </Grid>
+    </ScrollViewer>
+
+    <Border Grid.Row="2" Classes="panel" Padding="24,12" IsVisible="{Binding ShowFooter}" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+        <Button Grid.Column="1" Classes="ghost lg" Content="Cancel" Command="{Binding CloseCommand}" />
+        <Button Grid.Column="2" Classes="primary lg" Content="{Binding PrimaryText}" Command="{Binding PrimaryCommand}" MinWidth="140" />
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

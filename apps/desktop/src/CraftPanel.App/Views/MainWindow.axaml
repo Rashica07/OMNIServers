@@ -1,0 +1,146 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftPanel.App.ViewModels"
+        xmlns:v="using:CraftPanel.App.Views"
+        xmlns:c="using:CraftPanel.App.Controls"
+        xmlns:svc="using:CraftPanel.App.Services"
+        x:Class="CraftPanel.App.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="OMNIServers" Width="1180" Height="780" MinWidth="860" MinHeight="580"
+        Icon="avares://CraftPanel/Assets/icon.png">
+  <Window.KeyBindings>
+    <KeyBinding Gesture="F1" Command="{Binding ShowHelpCommand}" />
+    <KeyBinding Gesture="Ctrl+N" Command="{Binding NewServerCommand}" />
+    <KeyBinding Gesture="Ctrl+0" Command="{Binding ShowOverviewCommand}" />
+    <KeyBinding Gesture="Ctrl+OemComma" Command="{Binding ShowSettingsCommand}" />
+    <KeyBinding Gesture="Ctrl+OemQuestion" Command="{Binding ShowShortcutsCommand}" />
+  </Window.KeyBindings>
+  <Window.DataTemplates>
+    <DataTemplate DataType="vm:OverviewViewModel"><v:OverviewView /></DataTemplate>
+    <DataTemplate DataType="vm:ServerDetailViewModel"><v:ServerDetailView /></DataTemplate>
+    <DataTemplate DataType="vm:AppSettingsViewModel"><v:AppSettingsView /></DataTemplate>
+  </Window.DataTemplates>
+
+  <Grid x:Name="Root" ColumnDefinitions="256,1,*">
+    <!-- ============ icon rail (sidebar shrunk) ============ -->
+    <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,*,Auto" Background="{DynamicResource Cp.Surface}" IsVisible="{Binding SidebarCollapsed}">
+      <Button Grid.Row="0" Classes="ghost" HorizontalAlignment="Center" Margin="0,14,0,8" Padding="8" Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="Show the full sidebar"><c:Icon Kind="chevron-right" /></Button>
+      <StackPanel Grid.Row="1" Spacing="10" Margin="0,0,0,10">
+        <Button Classes="primary" Width="52" Height="52" HorizontalAlignment="Center" Command="{Binding NewServerCommand}" ToolTip.Tip="New server"><c:Icon Kind="plus" Width="22" Height="22" /></Button>
+        <RadioButton GroupName="rail" Classes="nav" Width="52" Height="52" HorizontalAlignment="Center" HorizontalContentAlignment="Center" IsChecked="{Binding OnOverview, Mode=OneWay}" Command="{Binding ShowOverviewCommand}" ToolTip.Tip="Overview"><c:Icon Kind="gauge" Width="22" Height="22" /></RadioButton>
+      </StackPanel>
+      <Border Grid.Row="2" Classes="rule" Margin="14,0" />
+      <ListBox Grid.Row="3" Classes="plain" ItemsSource="{Binding Servers}" SelectedItem="{Binding Selected, Mode=TwoWay}" Margin="0,8" HorizontalAlignment="Center" AutoScrollToSelectedItem="False">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:ServerItemViewModel">
+            <Grid Width="52" Height="52" Background="Transparent" ToolTip.Tip="{Binding Subtitle}">
+              <Border CornerRadius="12" Background="{DynamicResource Cp.Surface2}">
+                <TextBlock Text="{Binding Initial}" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <c:ToneDot Tone="{Binding Tone}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,4,4" />
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <RadioButton Grid.Row="4" GroupName="rail" Classes="nav" Width="52" Height="52" Margin="0,8,0,14" HorizontalAlignment="Center" HorizontalContentAlignment="Center" IsChecked="{Binding OnSettings, Mode=OneWay}" Command="{Binding ShowSettingsCommand}" ToolTip.Tip="OMNIServers settings"><c:Icon Kind="gear" Width="22" Height="22" /></RadioButton>
+    </Grid>
+
+    <!-- ============ sidebar ============ -->
+    <Grid Grid.Column="0" RowDefinitions="Auto,Auto,Auto,*,Auto" Background="{DynamicResource Cp.Surface}" IsVisible="{Binding SidebarExpanded}">
+      <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,16,10,10">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <Image Source="avares://CraftPanel/Assets/glyph.png" Width="26" Height="26" />
+          <TextBlock Text="OMNIServers" Classes="h2" VerticalAlignment="Center" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="ghost" Padding="6" Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="Shrink the sidebar to icons"><c:Icon Kind="chevron-left" /></Button>
+      </Grid>
+
+      <RadioButton Grid.Row="1" GroupName="nav" Classes="nav" IsChecked="{Binding OnOverview, Mode=OneWay}" Command="{Binding ShowOverviewCommand}" Margin="8,0">
+        <StackPanel Orientation="Horizontal" Spacing="10"><c:Icon Kind="gauge" /><TextBlock Text="Overview" /></StackPanel>
+      </RadioButton>
+
+      <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="18,14,18,6">
+        <TextBlock Text="Servers" Classes="label" />
+        <TextBlock Grid.Column="1" Text="{Binding Servers.Count}" Classes="label" />
+      </Grid>
+
+      <ListBox Grid.Row="3" Classes="plain" ItemsSource="{Binding Servers}" SelectedItem="{Binding Selected, Mode=TwoWay}" Margin="8,0" AutoScrollToSelectedItem="False">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:ServerItemViewModel">
+            <Grid ColumnDefinitions="Auto,*,Auto" Margin="10,8" Background="Transparent">
+              <Grid.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="Start" Click="OnServerMenuStart" IsEnabled="{Binding CanStart}" />
+                  <MenuItem Header="Stop" Click="OnServerMenuStop" IsEnabled="{Binding CanStop}" />
+                  <Separator />
+                  <MenuItem Header="Show folder" Click="OnServerMenuFolder" />
+                  <MenuItem Header="Copy folder path" Click="OnServerMenuCopyPath" />
+                  <Separator />
+                  <MenuItem Header="Remove from OMNIServers" Click="OnServerMenuRemove" IsEnabled="{Binding CanStart}" />
+                </ContextMenu>
+              </Grid.ContextMenu>
+              <c:ToneDot Tone="{Binding Tone}" Margin="0,0,10,0" />
+              <StackPanel Grid.Column="1" Spacing="1">
+                <TextBlock Text="{Binding Name}" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{Binding Subtitle}" Classes="faint small" TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+              <Border Grid.Column="2" Classes="badge ok" IsVisible="{Binding HasOnline}" VerticalAlignment="Center">
+                <TextBlock Text="{Binding OnlineCount}" />
+              </Border>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <Border Grid.Row="4" Classes="rule" VerticalAlignment="Top" />
+      <StackPanel Grid.Row="4" Margin="12,14,12,12" Spacing="8">
+        <Grid ColumnDefinitions="*,Auto">
+          <Button Classes="primary lg" HorizontalAlignment="Stretch" Command="{Binding NewServerCommand}" CornerRadius="6,0,0,6">
+            <StackPanel Orientation="Horizontal" Spacing="8"><c:Icon Kind="plus" /><TextBlock Text="New server" Foreground="{DynamicResource Cp.OnAccent}" /></StackPanel>
+          </Button>
+          <Button Grid.Column="1" Classes="primary lg square" Width="34" CornerRadius="0,6,6,0" Margin="1,0,0,0" ToolTip.Tip="More ways to add a server">
+            <c:Icon Kind="chevron-down" />
+            <Button.Flyout>
+              <MenuFlyout Placement="TopEdgeAlignedRight">
+                <MenuItem Header="Quick start (Skyblock, Bedwars…)" Command="{Binding QuickStartCommand}"><MenuItem.Icon><c:Icon Kind="zap" /></MenuItem.Icon></MenuItem>
+                <MenuItem Header="Browse modpacks" Command="{Binding ModpackCommand}"><MenuItem.Icon><c:Icon Kind="package" /></MenuItem.Icon></MenuItem>
+                <MenuItem Header="Add an existing folder…" Command="{Binding AddExistingCommand}"><MenuItem.Icon><c:Icon Kind="folder-open" /></MenuItem.Icon></MenuItem>
+              </MenuFlyout>
+            </Button.Flyout>
+          </Button>
+        </Grid>
+        <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Command="{Binding ShowHelpCommand}" ToolTip.Tip="Tips for this page, a full tutorial, and how-to guides (F1)">
+          <StackPanel Orientation="Horizontal" Spacing="10"><c:Icon Kind="help" Foreground="{DynamicResource Cp.InkDim}" /><TextBlock Text="Help &amp; tutorials" FontWeight="SemiBold" /></StackPanel>
+        </Button>
+        <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Command="{Binding ReportIssueCommand}" ToolTip.Tip="Report a bug or send an idea. Opens a new issue on GitHub">
+          <StackPanel Orientation="Horizontal" Spacing="10"><c:Icon Kind="flag" Foreground="{DynamicResource Cp.InkDim}" /><TextBlock Text="Report an issue" FontWeight="SemiBold" /></StackPanel>
+        </Button>
+        <RadioButton GroupName="nav" Classes="nav" IsChecked="{Binding OnSettings, Mode=OneWay}" Command="{Binding ShowSettingsCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="10"><c:Icon Kind="gear" /><TextBlock Text="OMNIServers settings" /></StackPanel>
+        </RadioButton>
+      </StackPanel>
+    </Grid>
+
+    <Border Grid.Column="1" Classes="vrule" />
+
+    <!-- ============ content ============ -->
+    <ContentControl Grid.Column="2" Content="{Binding Content}" />
+
+    <!-- ============ toasts ============ -->
+    <ItemsControl Grid.Column="2" ItemsSource="{Binding Toasts.Items}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16" IsHitTestVisible="True">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="svc:ToastItem">
+          <Border Classes="card" Width="300" Padding="12,10" Margin="0,8,0,0" BoxShadow="0 8 24 0 #66000000" Cursor="Hand" Tapped="OnToastTapped">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+              <c:Icon Kind="{Binding Icon}" Width="18" Height="18" Foreground="{Binding IconBrush}" VerticalAlignment="Top" Margin="0,1,0,0" />
+              <StackPanel Grid.Column="1" Spacing="1">
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Subtitle}" Classes="faint small" IsVisible="{Binding HasSubtitle}" />
+              </StackPanel>
+            </Grid>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </Grid>
+</Window>

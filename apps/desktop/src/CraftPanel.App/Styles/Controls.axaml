@@ -1,0 +1,342 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:CraftPanel.App.Controls">
+  <Styles.Resources>
+    <FontFamily x:Key="Cp.FontDisplay">avares://CraftPanel/Assets/Fonts#Space Grotesk Display</FontFamily>
+    <FontFamily x:Key="Cp.FontBody">Segoe UI Variable Text, Segoe UI, Inter, Helvetica Neue, Tahoma, Arial, sans-serif</FontFamily>
+    <FontFamily x:Key="Cp.FontMono">Cascadia Mono, Cascadia Code, Consolas, Menlo, Courier New, monospace</FontFamily>
+    <CornerRadius x:Key="Cp.RXs">4</CornerRadius>
+    <CornerRadius x:Key="Cp.RSm">8</CornerRadius>
+    <CornerRadius x:Key="Cp.RMd">11</CornerRadius>
+    <CornerRadius x:Key="Cp.RLg">15</CornerRadius>
+    <CornerRadius x:Key="Cp.RXl">20</CornerRadius>
+    <x:Double x:Key="Cp.ControlH">30</x:Double>
+  </Styles.Resources>
+
+  <!-- ===== composite controls ===== -->
+  <Style Selector="c|Field">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Spacing="5">
+          <TextBlock Text="{TemplateBinding Label}" Classes="label" IsVisible="{TemplateBinding Label, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+          <TextBlock Text="{TemplateBinding Hint}" Classes="faint small" TextWrapping="Wrap" IsVisible="{TemplateBinding Hint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="c|Card">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Classes="card" Padding="0">
+          <StackPanel>
+            <Grid ColumnDefinitions="Auto,*,Auto" Margin="18,14,18,12" ColumnSpacing="10">
+              <c:Icon Kind="{TemplateBinding Icon}" Width="17" Height="17" Foreground="{DynamicResource Cp.InkDim}" VerticalAlignment="Top" Margin="0,2,0,0" IsVisible="{TemplateBinding Icon, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+              <StackPanel Grid.Column="1" Spacing="3">
+                <TextBlock Text="{TemplateBinding Title}" Classes="h3" />
+                <TextBlock Text="{TemplateBinding Description}" Classes="faint small" TextWrapping="Wrap" IsVisible="{TemplateBinding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+              </StackPanel>
+              <ContentPresenter Grid.Column="2" Content="{TemplateBinding Actions}" VerticalAlignment="Center" />
+            </Grid>
+            <Border Classes="rule" />
+            <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Margin="18,16,18,18" />
+          </StackPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="c|SettingRow">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+          <StackPanel Spacing="3" VerticalAlignment="Center">
+            <TextBlock Text="{TemplateBinding Title}" FontWeight="Medium" TextWrapping="Wrap" />
+            <TextBlock Text="{TemplateBinding Hint}" Classes="faint small" TextWrapping="Wrap" IsVisible="{TemplateBinding Hint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          </StackPanel>
+          <ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" VerticalAlignment="Center" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <!-- ===== base ===== -->
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{DynamicResource Cp.Bg}" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" />
+    <Setter Property="FontFamily" Value="{DynamicResource Cp.FontBody}" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+  <Style Selector="UserControl">
+    <Setter Property="FontFamily" Value="{DynamicResource Cp.FontBody}" />
+  </Style>
+  <Style Selector="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" />
+  </Style>
+  <Style Selector="SelectableTextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" />
+  </Style>
+
+  <!-- ===== text roles ===== -->
+  <Style Selector=":is(TextBlock).display">
+    <Setter Property="FontFamily" Value="{DynamicResource Cp.FontDisplay}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector=":is(TextBlock).h1"><Setter Property="FontFamily" Value="{DynamicResource Cp.FontDisplay}" /><Setter Property="FontSize" Value="22" /><Setter Property="FontWeight" Value="Medium" /></Style>
+  <Style Selector=":is(TextBlock).h2"><Setter Property="FontFamily" Value="{DynamicResource Cp.FontDisplay}" /><Setter Property="FontSize" Value="17" /><Setter Property="FontWeight" Value="Medium" /></Style>
+  <Style Selector=":is(TextBlock).h3"><Setter Property="FontFamily" Value="{DynamicResource Cp.FontDisplay}" /><Setter Property="FontSize" Value="14" /><Setter Property="FontWeight" Value="Medium" /></Style>
+  <Style Selector=":is(TextBlock).dim"><Setter Property="Foreground" Value="{DynamicResource Cp.InkDim}" /></Style>
+  <Style Selector=":is(TextBlock).faint"><Setter Property="Foreground" Value="{DynamicResource Cp.InkFaint}" /></Style>
+  <Style Selector=":is(TextBlock).ghost"><Setter Property="Foreground" Value="{DynamicResource Cp.InkGhost}" /></Style>
+  <Style Selector=":is(TextBlock).small"><Setter Property="FontSize" Value="11.5" /></Style>
+  <Style Selector=":is(TextBlock).tiny"><Setter Property="FontSize" Value="10.5" /></Style>
+  <Style Selector=":is(TextBlock).mono"><Setter Property="FontFamily" Value="{DynamicResource Cp.FontMono}" /></Style>
+  <Style Selector=":is(TextBlock).label">
+    <Setter Property="FontSize" Value="11" /><Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.InkFaint}" />
+  </Style>
+  <Style Selector=":is(TextBlock).ok"><Setter Property="Foreground" Value="{DynamicResource Cp.OkSoft}" /></Style>
+  <Style Selector=":is(TextBlock).warn"><Setter Property="Foreground" Value="{DynamicResource Cp.Warn}" /></Style>
+  <Style Selector=":is(TextBlock).bad"><Setter Property="Foreground" Value="{DynamicResource Cp.BadSoft}" /></Style>
+  <Style Selector=":is(TextBlock).accent"><Setter Property="Foreground" Value="{DynamicResource Cp.Accent}" /></Style>
+
+  <!-- ===== buttons ===== -->
+  <Style Selector="Button">
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface3}" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Cp.Line}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Cp.RMd}" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="Height" Value="30" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface4}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Cp.LineStrong}" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" />
+  </Style>
+  <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface2}" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" />
+  </Style>
+  <!-- hover grows a touch, press dips (the click shake is in Services/ClickShake.cs) -->
+  <Style Selector="Button">
+    <Setter Property="RenderTransform" Value="none" />
+    <Setter Property="Transitions"><Transitions><TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="QuinticEaseOut" /></Transitions></Setter>
+  </Style>
+  <Style Selector="Button:pointerover:not(:disabled)"><Setter Property="RenderTransform" Value="scale(1.012)" /></Style>
+  <Style Selector="Button:pressed:not(:disabled)"><Setter Property="RenderTransform" Value="scale(0.97)" /></Style>
+  <Style Selector="Button:disabled"><Setter Property="Opacity" Value="0.45" /></Style>
+  <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" />
+  </Style>
+
+  <Style Selector="Button.primary"><Setter Property="Background" Value="{DynamicResource Cp.Accent}" /><Setter Property="Foreground" Value="{DynamicResource Cp.OnAccent}" /><Setter Property="BorderThickness" Value="0" /><Setter Property="FontWeight" Value="SemiBold" /></Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource Cp.AccentHover}" /><Setter Property="Foreground" Value="{DynamicResource Cp.OnAccent}" /><Setter Property="BorderThickness" Value="0" /></Style>
+  <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource Cp.AccentPress}" /><Setter Property="Foreground" Value="{DynamicResource Cp.OnAccent}" /></Style>
+  <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Foreground" Value="{DynamicResource Cp.OnAccent}" /></Style>
+
+  <Style Selector="Button.ghost"><Setter Property="Background" Value="{DynamicResource Cp.Surface2}" /></Style>
+  <Style Selector="Button.ghost:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource Cp.Surface3}" /></Style>
+
+  <Style Selector="Button.quiet"><Setter Property="Background" Value="Transparent" /><Setter Property="BorderThickness" Value="0" /><Setter Property="Foreground" Value="{DynamicResource Cp.InkDim}" /></Style>
+  <Style Selector="Button.quiet:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource Cp.Surface2}" /><Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" /><Setter Property="BorderThickness" Value="0" /></Style>
+
+  <Style Selector="Button.danger"><Setter Property="Background" Value="Transparent" /><Setter Property="Foreground" Value="{DynamicResource Cp.Bad}" /><Setter Property="BorderBrush" Value="{DynamicResource Cp.Bad35}" /></Style>
+  <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource Cp.Bad12}" /><Setter Property="Foreground" Value="{DynamicResource Cp.Bad}" /><Setter Property="BorderBrush" Value="{DynamicResource Cp.Bad}" /></Style>
+  <Style Selector="Button.danger:pressed /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Foreground" Value="{DynamicResource Cp.Bad}" /></Style>
+
+  <Style Selector="Button.sm"><Setter Property="Height" Value="26" /><Setter Property="MinHeight" Value="26" /><Setter Property="Padding" Value="9,0" /><Setter Property="FontSize" Value="12" /></Style>
+  <!-- overview server card: the button is invisible, the rounded body carries the look -->
+  <Style Selector="Button.servercard"><Setter Property="Background" Value="Transparent" /><Setter Property="BorderThickness" Value="0" /><Setter Property="CornerRadius" Value="{DynamicResource Cp.RLg}" /></Style>
+  <!-- wide cards must not grow on hover: the scroll area would clip their edges -->
+  <Style Selector="Button.servercard:pointerover:not(:disabled)"><Setter Property="RenderTransform" Value="none" /></Style>
+  <Style Selector="Button.servercard:pressed:not(:disabled)"><Setter Property="RenderTransform" Value="none" /></Style>
+  <Style Selector="Button.servercard /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="Transparent" /><Setter Property="BorderThickness" Value="0" /></Style>
+  <Style Selector="Button.servercard:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="Transparent" /></Style>
+  <Style Selector="Button.servercard:pressed /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="Transparent" /></Style>
+  <Style Selector="Border.servercardbody"><Setter Property="Background" Value="{DynamicResource Cp.Surface2}" /><Setter Property="BorderBrush" Value="{DynamicResource Cp.Line}" /><Setter Property="BorderThickness" Value="1" /><Setter Property="CornerRadius" Value="{DynamicResource Cp.RLg}" /><Setter Property="Transitions"><Transitions><BrushTransition Property="Background" Duration="0:0:0.25" /></Transitions></Setter></Style>
+  <Style Selector="Button.servercard:pointerover Border.servercardbody"><Setter Property="Background" Value="{DynamicResource Cp.Surface3}" /></Style>
+  <Style Selector="Button.ghost.sel"><Setter Property="BorderBrush" Value="{DynamicResource Cp.Accent}" /></Style>
+  <Style Selector="Button.lg"><Setter Property="Height" Value="36" /><Setter Property="MinHeight" Value="36" /><Setter Property="Padding" Value="16,0" /></Style>
+  <Style Selector="Button.square"><Setter Property="Width" Value="30" /><Setter Property="Padding" Value="0" /></Style>
+  <Style Selector="Button.square.sm"><Setter Property="Width" Value="26" /></Style>
+
+  <!-- ===== inputs ===== -->
+  <Style Selector="TextBox">
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface2}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Cp.Line}" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Cp.RMd}" />
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="Padding" Value="9,5" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement"><Setter Property="Background" Value="{DynamicResource Cp.Surface2}" /><Setter Property="BorderBrush" Value="{DynamicResource Cp.LineStrong}" /></Style>
+  <Style Selector="TextBox:focus /template/ Border#PART_BorderElement"><Setter Property="Background" Value="{DynamicResource Cp.Surface2}" /><Setter Property="BorderBrush" Value="{DynamicResource Cp.Accent}" /></Style>
+  <Style Selector="TextBox.invalid /template/ Border#PART_BorderElement"><Setter Property="BorderBrush" Value="{DynamicResource Cp.Bad}" /></Style>
+  <Style Selector="TextBox.invalid:focus /template/ Border#PART_BorderElement"><Setter Property="BorderBrush" Value="{DynamicResource Cp.Bad}" /></Style>
+  <Style Selector="TextBox.mono"><Setter Property="FontFamily" Value="{DynamicResource Cp.FontMono}" /></Style>
+
+  <Style Selector="ComboBox">
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface2}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Cp.Line}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Cp.RMd}" />
+    <Setter Property="MinHeight" Value="30" />
+  </Style>
+  <Style Selector="ComboBox:pointerover /template/ Border#Background"><Setter Property="Background" Value="{DynamicResource Cp.Surface2}" /><Setter Property="BorderBrush" Value="{DynamicResource Cp.LineStrong}" /></Style>
+  <Style Selector="NumericUpDown">
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface2}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Cp.Line}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Cp.RMd}" />
+  </Style>
+
+  <Style Selector="CheckBox"><Setter Property="Foreground" Value="{DynamicResource Cp.InkDim}" /></Style>
+  <Style Selector="ToggleSwitch"><Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" /></Style>
+  <Style Selector="Slider /template/ Border#TrackBackground"><Setter Property="Background" Value="{DynamicResource Cp.Surface3}" /></Style>
+
+  <!-- ===== surfaces ===== -->
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface2}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Cp.LineSoft}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Cp.RLg}" />
+    <Setter Property="Padding" Value="16" />
+  </Style>
+  <Style Selector="Border.panel">
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface}" />
+  </Style>
+  <Style Selector="Border.rule"><Setter Property="Background" Value="{DynamicResource Cp.LineSoft}" /><Setter Property="Height" Value="1" /></Style>
+  <Style Selector="Border.vrule"><Setter Property="Background" Value="{DynamicResource Cp.LineSoft}" /><Setter Property="Width" Value="1" /></Style>
+
+  <!-- ===== badges ===== -->
+  <Style Selector=":is(Border).badge">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Padding" Value="7,2" />
+  </Style>
+  <Style Selector=":is(Border).badge > TextBlock"><Setter Property="FontSize" Value="11" /><Setter Property="FontWeight" Value="Medium" /><Setter Property="Foreground" Value="{DynamicResource Cp.InkDim}" /></Style>
+  <Style Selector=":is(Border).badge.accent"><Setter Property="Background" Value="{DynamicResource Cp.AccentMuted}" /></Style>
+  <Style Selector=":is(Border).badge.accent > TextBlock"><Setter Property="Foreground" Value="{DynamicResource Cp.AccentSoft}" /></Style>
+  <Style Selector=":is(Border).badge.ok"><Setter Property="Background" Value="{DynamicResource Cp.Ok12}" /></Style>
+  <Style Selector=":is(Border).badge.ok > TextBlock"><Setter Property="Foreground" Value="{DynamicResource Cp.OkSoft}" /></Style>
+  <Style Selector=":is(Border).badge.warn"><Setter Property="Background" Value="{DynamicResource Cp.Warn12}" /></Style>
+  <Style Selector=":is(Border).badge.warn > TextBlock"><Setter Property="Foreground" Value="{DynamicResource Cp.WarnSoft}" /></Style>
+  <Style Selector=":is(Border).badge.bad"><Setter Property="Background" Value="{DynamicResource Cp.Bad12}" /></Style>
+  <Style Selector=":is(Border).badge.bad > TextBlock"><Setter Property="Foreground" Value="{DynamicResource Cp.BadSoft}" /></Style>
+
+  <Style Selector=":is(Border).dot"><Setter Property="Width" Value="8" /><Setter Property="Height" Value="8" /><Setter Property="CornerRadius" Value="2" /><Setter Property="Background" Value="{DynamicResource Cp.InkGhost}" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
+  <Style Selector=":is(Border).dot.ok"><Setter Property="Background" Value="{DynamicResource Cp.Ok}" /><Setter Property="BoxShadow" Value="0 0 6 0 #6034D399" /></Style>
+  <Style Selector=":is(Border).dot.warn"><Setter Property="Background" Value="{DynamicResource Cp.Warn}" /></Style>
+  <Style Selector=":is(Border).dot.bad"><Setter Property="Background" Value="{DynamicResource Cp.Bad}" /></Style>
+  <Style Selector=":is(Border).dot.accent"><Setter Property="Background" Value="{DynamicResource Cp.Accent}" /></Style>
+  <Style Selector=":is(Border).dot.info"><Setter Property="Background" Value="{DynamicResource Cp.Info}" /></Style>
+
+  <!-- ===== banners ===== -->
+  <Style Selector="Border.banner"><Setter Property="CornerRadius" Value="{DynamicResource Cp.RLg}" /><Setter Property="Padding" Value="12,10" /><Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface2}" /><Setter Property="BorderBrush" Value="{DynamicResource Cp.Line}" /></Style>
+  <Style Selector="Border.banner.warn"><Setter Property="Background" Value="{DynamicResource Cp.Warn12}" /><Setter Property="BorderBrush" Value="{DynamicResource Cp.Warn35}" /></Style>
+  <Style Selector="Border.banner.bad"><Setter Property="Background" Value="{DynamicResource Cp.Bad12}" /><Setter Property="BorderBrush" Value="{DynamicResource Cp.Bad35}" /></Style>
+  <Style Selector="Border.banner.ok"><Setter Property="Background" Value="{DynamicResource Cp.Ok12}" /></Style>
+  <Style Selector="Border.banner.info"><Setter Property="Background" Value="{DynamicResource Cp.Info12}" /></Style>
+
+  <!-- ===== tabs (underline) ===== -->
+  <Style Selector="RadioButton.tab">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.InkFaint}" />
+    <Setter Property="Padding" Value="8,9" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="Transparent" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,0,0,2" Padding="{TemplateBinding Padding}" Name="TabBorder">
+          <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" RecognizesAccessKey="True" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="RadioButton.tab:pointerover"><Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" /></Style>
+  <Style Selector="RadioButton.tab:checked"><Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" /><Setter Property="BorderBrush" Value="{DynamicResource Cp.Accent}" /></Style>
+
+  <!-- ===== server page side rail ===== -->
+  <Style Selector="RadioButton.side">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.InkFaint}" />
+    <Setter Property="Padding" Value="10,8" />
+    <Setter Property="Margin" Value="0,0,0,2" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+          <ContentPresenter Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="RadioButton.side:pointerover"><Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" /><Setter Property="Background" Value="{DynamicResource Cp.Surface2}" /></Style>
+  <Style Selector="RadioButton.side:checked"><Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" /><Setter Property="Background" Value="{DynamicResource Cp.Surface3}" /></Style>
+
+  <!-- ===== sidebar nav ===== -->
+  <Style Selector="RadioButton.nav">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.InkDim}" />
+    <Setter Property="Padding" Value="10,8" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+          <ContentPresenter Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="RadioButton.nav:pointerover"><Setter Property="Background" Value="{DynamicResource Cp.Surface2}" /><Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" /></Style>
+  <Style Selector="RadioButton.nav:checked"><Setter Property="Background" Value="{DynamicResource Cp.Surface3}" /><Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" /></Style>
+
+  <!-- ===== segmented control ===== -->
+  <Style Selector="RadioButton.seg">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.InkFaint}" />
+    <Setter Property="Padding" Value="0,6" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" CornerRadius="9" Padding="{TemplateBinding Padding}">
+          <ContentPresenter Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" HorizontalAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="RadioButton.seg:pointerover"><Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" /></Style>
+  <Style Selector="RadioButton.seg:checked"><Setter Property="Background" Value="{DynamicResource Cp.Surface4}" /><Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" /></Style>
+
+  <!-- ===== list rows ===== -->
+  <Style Selector="ListBox.plain"><Setter Property="Background" Value="Transparent" /><Setter Property="BorderThickness" Value="0" /><Setter Property="Padding" Value="0" /></Style>
+  <Style Selector="ListBox.plain > ListBoxItem"><Setter Property="Padding" Value="0" /><Setter Property="Margin" Value="0,0,0,2" /><Setter Property="CornerRadius" Value="{DynamicResource Cp.RMd}" /><Setter Property="Background" Value="Transparent" /></Style>
+  <Style Selector="ListBox.plain > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource Cp.Surface2}" /></Style>
+  <Style Selector="ListBox.plain > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource Cp.Surface3}" /></Style>
+  <Style Selector="ListBox.plain > ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Background" Value="{DynamicResource Cp.Surface3}" /></Style>
+
+  <Style Selector="ContextMenu, MenuFlyoutPresenter">
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface2}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Cp.Line}" />
+  </Style>
+  <Style Selector="ToolTip">
+    <Setter Property="Background" Value="{DynamicResource Cp.Surface3}" />
+    <Setter Property="Foreground" Value="{DynamicResource Cp.Ink}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Cp.Line}" />
+  </Style>
+</Styles>

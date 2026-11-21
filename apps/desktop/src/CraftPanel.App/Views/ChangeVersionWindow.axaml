@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftPanel.App.ViewModels"
+        xmlns:c="using:CraftPanel.App.Controls"
+        x:Class="CraftPanel.App.Views.ChangeVersionWindow"
+        x:DataType="vm:ChangeVersionViewModel"
+        Title="Change version" Width="520" Height="640" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="22" RowSpacing="14">
+    <StackPanel Spacing="4"><TextBlock Text="Change version" Classes="h1" /><TextBlock Classes="faint"><Run Text="{Binding ServerName}" /><Run Text=" is on " /><Run Text="{Binding Current}" /></TextBlock></StackPanel>
+    <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*" RowSpacing="10">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+        <c:Field Label="Software"><ComboBox ItemsSource="{Binding Loaders}" SelectedItem="{Binding SelectedLoader, Mode=TwoWay}" MinWidth="140"><ComboBox.ItemTemplate><DataTemplate x:DataType="vm:LoaderOption"><TextBlock Text="{Binding Label}" /></DataTemplate></ComboBox.ItemTemplate></ComboBox></c:Field>
+        <c:Field Grid.Column="1" Label="Search"><TextBox Text="{Binding Query, Mode=TwoWay}" PlaceholderText="1.21…" /></c:Field>
+        <CheckBox Grid.Column="2" Content="Snapshots" IsChecked="{Binding ShowUnstable, Mode=TwoWay}" VerticalAlignment="Bottom" />
+      </Grid>
+      <ProgressBar Grid.Row="1" IsIndeterminate="True" Height="3" IsVisible="{Binding Loading}" />
+      <ListBox Grid.Row="2" Classes="plain" ItemsSource="{Binding Versions}" SelectedItem="{Binding Selected, Mode=TwoWay}">
+        <ListBox.ItemTemplate><DataTemplate x:DataType="vm:VersionRow"><Grid ColumnDefinitions="*,Auto" Margin="12,8"><TextBlock Text="{Binding Id}" /><Border Grid.Column="1" Classes="badge" IsVisible="{Binding !IsStable}"><TextBlock Text="{Binding Kind}" /></Border></Grid></DataTemplate></ListBox.ItemTemplate>
+      </ListBox>
+    </Grid>
+    <StackPanel Grid.Row="2" Spacing="10">
+      <Border Classes="banner bad" IsVisible="{Binding HasError}"><TextBlock Text="{Binding Error}" Classes="bad" TextWrapping="Wrap" /></Border>
+      <TextBlock Text="{Binding Message}" Classes="dim" />
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+        <Button Grid.Column="1" Classes="ghost" Content="Cancel" Command="{Binding CancelCommand}" />
+        <Button Grid.Column="2" Classes="primary" Content="Switch version" Command="{Binding ApplyCommand}" />
+      </Grid>
+    </StackPanel>
+  </Grid>
+</Window>

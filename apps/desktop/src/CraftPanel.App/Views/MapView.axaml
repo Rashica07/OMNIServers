@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.MapView"
+             x:DataType="vm:MapViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="24,20" Spacing="16" MaxWidth="640" HorizontalAlignment="Center">
+      <!-- unsupported -->
+      <c:Card Title="Live map" Icon="map" IsVisible="{Binding IsUnsupported}"><TextBlock Text="{Binding UnsupportedText}" Classes="dim" TextWrapping="Wrap" /></c:Card>
+
+      <!-- install / consent -->
+      <Border Classes="card" Padding="22" IsVisible="{Binding IsNotInstalled}">
+        <StackPanel Spacing="16">
+          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+            <Border Width="54" Height="54" CornerRadius="10" Background="{DynamicResource Cp.AccentMuted}"><c:Icon Kind="map" Width="28" Height="28" Foreground="{DynamicResource Cp.Accent}" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2"><TextBlock Text="A live map of your world" Classes="h2" /><TextBlock Text="Powered by BlueMap — free and open source." Classes="faint" /></StackPanel>
+          </Grid>
+          <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="10"><c:Icon Kind="cube" Foreground="{DynamicResource Cp.Accent}" /><TextBlock Text="3D and flat views you can fly around" /></StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="10"><c:Icon Kind="globe" Foreground="{DynamicResource Cp.Accent}" /><TextBlock Text="Overworld, Nether and End — switch in the map" /></StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="10"><c:Icon Kind="users" Foreground="{DynamicResource Cp.Accent}" /><TextBlock Text="See where everyone is, live" /></StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="10"><c:Icon Kind="wifi" Foreground="{DynamicResource Cp.Accent}" /><TextBlock Text="Friends on your network can open it in a browser" /></StackPanel>
+          </StackPanel>
+          <CheckBox IsChecked="{Binding Agreed, Mode=TwoWay}">
+            <TextBlock Text="BlueMap downloads Minecraft's textures from Mojang once, to draw the map. I own Minecraft: Java Edition and accept Mojang's EULA (minecraft.net/eula)." TextWrapping="Wrap" Classes="dim small" MaxWidth="500" />
+          </CheckBox>
+          <Border Classes="banner bad" IsVisible="{Binding HasError}"><TextBlock Text="{Binding Error}" Classes="bad" TextWrapping="Wrap" /></Border>
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasBusy}"><ProgressBar IsIndeterminate="True" Width="50" Height="4" /><TextBlock Text="{Binding Busy}" Classes="dim" /></StackPanel>
+            <Button Content="Install BlueMap" Classes="primary" Command="{Binding InstallCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <c:Card Title="One more step" Icon="map" IsVisible="{Binding IsNeedsConsent}">
+        <StackPanel Spacing="12">
+          <TextBlock Text="BlueMap is installed but hasn't been allowed to download the textures it needs." Classes="dim" TextWrapping="Wrap" />
+          <CheckBox IsChecked="{Binding Agreed, Mode=TwoWay}"><TextBlock Text="I own Minecraft: Java Edition and accept Mojang's EULA." Classes="dim small" /></CheckBox>
+          <Button Content="Allow and turn on the map" Classes="primary" HorizontalAlignment="Left" Command="{Binding ConsentCommand}" />
+        </StackPanel>
+      </c:Card>
+
+      <!-- states -->
+      <c:EmptyState Icon="map" Title="Start the server to see the map" Message="BlueMap runs inside your server — the map comes alive as soon as it's up." IsVisible="{Binding IsStopped}" />
+
+      <c:Card Title="Restart to turn on the map" Icon="rotate" IsVisible="{Binding IsNeedsRestart}">
+        <StackPanel Spacing="12">
+          <TextBlock Text="BlueMap is installed. The server needs a restart to load it — players online will be disconnected briefly." Classes="dim" TextWrapping="Wrap" />
+          <StackPanel Orientation="Horizontal" Spacing="10"><Button Content="Restart now" Classes="primary" Command="{Binding RestartCommand}" /><TextBlock Text="{Binding Busy}" Classes="dim" VerticalAlignment="Center" /></StackPanel>
+        </StackPanel>
+      </c:Card>
+
+      <StackPanel Spacing="10" HorizontalAlignment="Center" IsVisible="{Binding IsStarting}">
+        <ProgressBar IsIndeterminate="True" Width="160" />
+        <TextBlock Text="Starting the map…" FontWeight="SemiBold" HorizontalAlignment="Center" />
+        <TextBlock Text="The first render of a big world can take a few minutes; the map fills in as it goes." Classes="faint" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="360" />
+      </StackPanel>
+
+      <!-- up -->
+      <c:Card Title="Your live map is running" Icon="map" IsVisible="{Binding IsUp}" Description="Opens in your browser — 3D and flat views, every dimension, live player positions.">
+        <StackPanel Spacing="14">
+          <Button Classes="primary lg" Command="{Binding OpenCommand}" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" Spacing="8"><c:Icon Kind="external-link" /><TextBlock Text="Open the map" Foreground="{DynamicResource Cp.OnAccent}" /></StackPanel>
+          </Button>
+          <c:Field Label="On this pc"><SelectableTextBlock Text="{Binding LocalLink}" Classes="mono" /></c:Field>
+          <c:Field Label="Friends on your network" Hint="They open this in any browser. For people outside your home, forward this port on your router too.">
+            <StackPanel Orientation="Horizontal" Spacing="8"><SelectableTextBlock Text="{Binding LanLink}" Classes="mono" VerticalAlignment="Center" /><Button Classes="ghost sm square" Command="{Binding CopyLinkCommand}"><c:Icon Kind="copy" Width="13" Height="13" /></Button></StackPanel>
+          </c:Field>
+        </StackPanel>
+      </c:Card>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

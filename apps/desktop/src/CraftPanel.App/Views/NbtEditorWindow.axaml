@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftPanel.App.ViewModels"
+        xmlns:c="using:CraftPanel.App.Controls"
+        x:Class="CraftPanel.App.Views.NbtEditorWindow"
+        x:DataType="vm:NbtEditorViewModel"
+        Title="NBT editor" Width="780" Height="660" MinWidth="560" MinHeight="420" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+  <Grid RowDefinitions="Auto,Auto,Auto,*">
+    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8" Margin="20,16,20,12">
+      <StackPanel Spacing="2">
+        <TextBlock Text="{Binding Heading}" Classes="h2" />
+        <TextBlock Classes="faint small"><Run Text="{Binding Title}" /><Run Text="   ·   " /><Run Text="{Binding FormatNote}" /></TextBlock>
+      </StackPanel>
+      <Button Grid.Column="1" Classes="ghost sm" Content="Expand all" Command="{Binding ExpandAllCommand}" VerticalAlignment="Center" />
+      <Button Grid.Column="2" Classes="ghost sm" Content="Collapse" Command="{Binding CollapseAllCommand}" VerticalAlignment="Center" />
+      <Button Grid.Column="3" Classes="ghost" Content="Close" Command="{Binding CloseCommand}" />
+      <Button Grid.Column="4" Classes="primary" Content="{Binding SaveLabel}" Command="{Binding SaveCommand}" MinWidth="84" />
+    </Grid>
+    <Border Grid.Row="1" Classes="banner warn" Margin="20,0,20,10" IsVisible="{Binding ServerRunning}"><TextBlock Text="Stop the server to save — it overwrites this file while it's running." TextWrapping="Wrap" /></Border>
+    <Border Grid.Row="2" Classes="banner bad" Margin="20,0,20,10" IsVisible="{Binding HasError}"><TextBlock Text="{Binding Error}" Classes="bad" TextWrapping="Wrap" /></Border>
+
+    <Border Grid.Row="3" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="0,1,0,0">
+      <TreeView ItemsSource="{Binding Roots}" Background="Transparent" Padding="10,8">
+        <TreeView.Styles>
+          <Style Selector="TreeViewItem" x:DataType="vm:NbtNodeViewModel">
+            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            <Setter Property="MinHeight" Value="30" />
+          </Style>
+        </TreeView.Styles>
+        <TreeView.ItemTemplate>
+          <TreeDataTemplate x:DataType="vm:NbtNodeViewModel" ItemsSource="{Binding Children}">
+            <Grid ColumnDefinitions="Auto,72,*" ColumnSpacing="10" Margin="0,2">
+              <TextBlock Text="{Binding Key}" FontWeight="SemiBold" VerticalAlignment="Center" MinWidth="120" />
+              <Border Grid.Column="1" Classes="badge" VerticalAlignment="Center" HorizontalAlignment="Left" IsVisible="{Binding !IsNote}"><TextBlock Text="{Binding TypeName}" /></Border>
+              <TextBox Grid.Column="2" Classes="mono" Text="{Binding Text, Mode=TwoWay}" IsVisible="{Binding IsEditable}" Classes.invalid="{Binding Invalid}" FontSize="12" MinHeight="26" Padding="8,3" HorizontalAlignment="Stretch" MaxWidth="460" />
+              <TextBlock Grid.Column="2" Text="{Binding Detail}" Classes="faint small" VerticalAlignment="Center" IsVisible="{Binding HasDetail}" />
+            </Grid>
+          </TreeDataTemplate>
+        </TreeView.ItemTemplate>
+      </TreeView>
+    </Border>
+  </Grid>
+</Window>

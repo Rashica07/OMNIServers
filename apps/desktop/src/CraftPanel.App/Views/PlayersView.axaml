@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.PlayersView"
+             x:DataType="vm:PlayersViewModel">
+  <UserControl.Resources>
+    <DataTemplate x:Key="ListedRow" x:DataType="vm:PlayerRow">
+      <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Margin="0,4">
+        <Border Width="24" Height="24" CornerRadius="6" Background="{Binding Avatar}"><TextBlock Text="{Binding Initial}" FontSize="11" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+        <StackPanel Grid.Column="1" Spacing="0" VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontWeight="Medium" /><TextBlock Text="{Binding Detail}" Classes="faint small" IsVisible="{Binding HasDetail}" /></StackPanel>
+      </Grid>
+    </DataTemplate>
+  </UserControl.Resources>
+  <ScrollViewer>
+    <StackPanel Margin="24,20" Spacing="16" MaxWidth="760" HorizontalAlignment="Center">
+      <Border Classes="banner" IsVisible="{Binding HasNote}"><TextBlock Text="{Binding Note}" Classes="dim" TextWrapping="Wrap" /></Border>
+
+      <c:Card Title="{Binding OnlineTitle}" Icon="users">
+        <StackPanel Spacing="4">
+          <TextBlock Text="Nobody is online right now." Classes="faint" IsVisible="{Binding OnlineEmpty}" />
+          <ItemsControl ItemsSource="{Binding Online}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:PlayerRow">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="0,5">
+                  <Border Width="28" Height="28" CornerRadius="7" Background="{Binding Avatar}"><TextBlock Text="{Binding Initial}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                  <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Medium" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
+                    <Button Classes="ghost sm" Content="Kick" Command="{Binding $parent[UserControl].((vm:PlayersViewModel)DataContext).KickCommand}" CommandParameter="{Binding Name}" />
+                    <Button Classes="ghost sm" Content="Op" Command="{Binding $parent[UserControl].((vm:PlayersViewModel)DataContext).OpCommand}" CommandParameter="{Binding Name}" />
+                    <Button Classes="danger sm" Content="Ban" Command="{Binding $parent[UserControl].((vm:PlayersViewModel)DataContext).BanCommand}" CommandParameter="{Binding Name}" />
+                  </StackPanel>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </c:Card>
+
+      <c:Card Title="Add a player" Icon="user-plus" Description="By name — works for whitelist, operators and bans, even for someone who hasn't joined yet. The server must be running.">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
+          <TextBox Text="{Binding NewName, Mode=TwoWay}" PlaceholderText="Player name" />
+          <Button Grid.Column="1" Classes="ghost" Content="Whitelist" Command="{Binding AddWhitelistCommand}" />
+          <Button Grid.Column="2" Classes="ghost" Content="Make operator" Command="{Binding AddOpCommand}" />
+          <Button Grid.Column="3" Classes="danger" Content="Ban" Command="{Binding AddBanCommand}" />
+        </Grid>
+      </c:Card>
+
+      <c:Card Title="Everyone who has played" Icon="clock" Description="Worked out from the server's logs.">
+        <StackPanel>
+          <TextBlock Text="No one has joined yet." Classes="faint" IsVisible="{Binding NoSeen}" />
+          <ItemsControl ItemsSource="{Binding Seen}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SeenRow">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="0,6">
+                  <Border Width="26" Height="26" CornerRadius="7" Background="{Binding Avatar}"><TextBlock Text="{Binding Initial}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                  <StackPanel Grid.Column="1"><TextBlock Text="{Binding Name}" FontWeight="Medium" /><TextBlock Text="{Binding Detail}" Classes="faint small" /></StackPanel>
+                  <Border Grid.Column="2" Classes="badge ok" IsVisible="{Binding Online}"><TextBlock Text="online" /></Border>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </c:Card>
+
+      <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+        <c:Card Title="Whitelist" Icon="check-circle">
+          <ItemsControl ItemsSource="{Binding Whitelist}">
+            <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:PlayerRow"><Grid ColumnDefinitions="*,Auto" Margin="0,3"><TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+              <Button Grid.Column="1" Classes="quiet sm square" Command="{Binding $parent[UserControl].((vm:PlayersViewModel)DataContext).UnWhitelistCommand}" CommandParameter="{Binding Name}" ToolTip.Tip="Remove"><c:Icon Kind="x" Width="13" Height="13" /></Button></Grid></DataTemplate></ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </c:Card>
+        <c:Card Grid.Column="1" Title="Operators" Icon="shield">
+          <ItemsControl ItemsSource="{Binding Ops}">
+            <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:PlayerRow"><Grid ColumnDefinitions="*,Auto" Margin="0,3"><StackPanel><TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" /><TextBlock Text="{Binding Detail}" Classes="faint tiny" /></StackPanel>
+              <Button Grid.Column="1" Classes="quiet sm square" Command="{Binding $parent[UserControl].((vm:PlayersViewModel)DataContext).UnOpCommand}" CommandParameter="{Binding Name}" ToolTip.Tip="Remove operator"><c:Icon Kind="x" Width="13" Height="13" /></Button></Grid></DataTemplate></ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </c:Card>
+        <c:Card Grid.Column="2" Title="Banned" Icon="ban">
+          <ItemsControl ItemsSource="{Binding Banned}">
+            <ItemsControl.ItemTemplate><DataTemplate x:DataType="vm:PlayerRow"><Grid ColumnDefinitions="*,Auto" Margin="0,3"><StackPanel><TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" /><TextBlock Text="{Binding Detail}" Classes="faint tiny" TextTrimming="CharacterEllipsis" /></StackPanel>
+              <Button Grid.Column="1" Classes="quiet sm square" Command="{Binding $parent[UserControl].((vm:PlayersViewModel)DataContext).PardonCommand}" CommandParameter="{Binding Name}" ToolTip.Tip="Pardon"><c:Icon Kind="x" Width="13" Height="13" /></Button></Grid></DataTemplate></ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </c:Card>
+      </Grid>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

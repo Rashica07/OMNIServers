@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftPanel.App.ViewModels"
+             xmlns:c="using:CraftPanel.App.Controls"
+             x:Class="CraftPanel.App.Views.ModsView"
+             x:DataType="vm:ModsViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="24,20" Spacing="16" MaxWidth="760" HorizontalAlignment="Center">
+      <c:Card Title="Installed" Icon="package" Description="Turn a mod off without deleting it — the server skips files ending in .disabled.">
+        <c:Card.Actions>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Classes="ghost sm" Content="Open folder" Command="{Binding OpenFolderCommand}" />
+            <Button Classes="primary sm" Content="Add .jar…" Command="{Binding AddCommand}" />
+          </StackPanel>
+        </c:Card.Actions>
+        <StackPanel>
+          <c:EmptyState Icon="package" Title="Nothing here yet" Message="Add a .jar file, or find mods in the Add-ons tab." IsVisible="{Binding IsEmpty}" />
+          <ItemsControl ItemsSource="{Binding Mods}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ModRow">
+                <Border Padding="0,9" BorderBrush="{DynamicResource Cp.LineSoft}" BorderThickness="0,0,0,1">
+                  <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
+                    <StackPanel Spacing="2">
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" Classes.faint="{Binding !Enabled}" TextTrimming="CharacterEllipsis" />
+                        <Border Classes="badge accent" IsVisible="{Binding IsManaged}"><TextBlock Text="from Modrinth" /></Border>
+                        <Border Classes="badge warn" IsVisible="{Binding !Enabled}"><TextBlock Text="disabled" /></Border>
+                      </StackPanel>
+                      <TextBlock Text="{Binding Size}" Classes="faint small" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Classes="ghost sm" Content="{Binding ToggleText}" Command="{Binding $parent[UserControl].((vm:ModsViewModel)DataContext).ToggleCommand}" CommandParameter="{Binding}" />
+                    <Button Grid.Column="3" Classes="danger sm square" ToolTip.Tip="Remove" Command="{Binding $parent[UserControl].((vm:ModsViewModel)DataContext).RemoveCommand}" CommandParameter="{Binding}"><c:Icon Kind="trash" Width="13" Height="13" /></Button>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </c:Card>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
