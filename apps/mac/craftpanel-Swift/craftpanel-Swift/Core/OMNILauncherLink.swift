@@ -92,11 +92,24 @@ enum OMNILauncherLink {
         return open() || isRunning()
     }
 
-    /// Opens the launcher. Returns false when it is not installed, so the caller can say so.
+    /// The process id of a running launcher (installed, or started from source), if any.
+    static func runningPID() -> pid_t? {
+        guard let r = try? Subprocess.run("/usr/bin/pgrep", ["-x", "omni-launcher"], timeout: 3), r.status == 0 else { return nil }
+        return r.stdoutString.split(separator: "\n").first.flatMap { pid_t($0) }
+    }
+
+    /// Opens the launcher, or brings it to the front when it is already running (also when it was started from source and isn't an installed
+    /// app). Returns false only when it is neither installed nor running, so the caller can offer to install it.
     @discardableResult
     static func open() -> Bool {
-        guard let url = installedURL() else { return false }
-        NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+        if let url = installedURL() {
+            NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+            return true
+        }
+        guard let pid = runningPID() else { return false }
+        if let app = NSRunningApplication(processIdentifier: pid), app.activate(options: [.activateAllWindows]) { return true }
+        // A launcher run from source has no app bundle: ask System Events to raise it.
+        _ = try? Subprocess.run("/usr/bin/osascript", ["-e", "tell application \"System Events\" to set frontmost of (first process whose unix id is \(pid)) to true"], timeout: 5)
         return true
     }
 }
