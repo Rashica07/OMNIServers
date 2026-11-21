@@ -2,4 +2,7 @@
   <PropertyGroup>
     <RootNamespace>CraftPanel.Core</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\omnihost-icon-64.png" LogicalName="omnihost-icon-64.png" />
+  </ItemGroup>
 </Project>

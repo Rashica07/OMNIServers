@@ -184,7 +184,8 @@ public sealed class ServerRuntime
 
         var cfg = new ServerConfig(record.Path, record.LaunchTarget, record.JavaPath, record.RamMB, record.ServerType,
             Network.CrossplayManager.LaunchJvmArgs(record.Path, record.ServerType, record.JvmArgs));   // adds Geyser's NetherNet flag when Geyser is installed
-        MinecraftAdapter.EnsureUserJvmArgs(cfg);
+        if (!record.ServerType.IsOmniHost()) MinecraftAdapter.EnsureUserJvmArgs(cfg);
+        if (record.ServerType.IsOmniHost()) OmniHostAdapter.PrepareFolder(record.Path);
         if (record.ServerType.IsGame())
         {
             if (!GameServers.IsPlatformSupported(record.ServerType))
@@ -194,7 +195,9 @@ public sealed class ServerRuntime
             GameServers.Fix(record.ServerType, record.Path, record.Name);
         }
         foreach (var b in GameServers.Banner(record.ServerType.IsGame() ? record.ServerType.Label() : "Minecraft")) Push(LogStream.System, b);
-        var spec = record.ServerType.IsGame() ? GameServers.StartCommand(cfg) : MinecraftAdapter.StartCommand(cfg);
+        var spec = record.ServerType.IsOmniHost()
+            ? OmniHostAdapter.StartCommand(cfg) ?? throw new ProvisionException(OmniHostAdapter.MissingEngineReason)
+            : record.ServerType.IsGame() ? GameServers.StartCommand(cfg) : MinecraftAdapter.StartCommand(cfg);
         var psi = new ProcessStartInfo(spec.FileName)
         {
             WorkingDirectory = spec.WorkingDirectory, UseShellExecute = false, CreateNoWindow = true,
@@ -264,8 +267,14 @@ public sealed class ServerRuntime
         if (text.Contains("You need to agree to the EULA")) { NeedsEula = true; StateChanged?.Invoke(); }
         if (Status == ServerStatus.Starting)
         {
-            var s = type.IsGame() ? GameServers.ParseStatus(type, text) : type.IsBedrock() ? BedrockAdapter.ParseStatus(text) : MinecraftAdapter.ParseStatus(text);
+            var s = type.IsOmniHost() ? OmniHostAdapter.ParseStatus(text) : type.IsGame() ? GameServers.ParseStatus(type, text) : type.IsBedrock() ? BedrockAdapter.ParseStatus(text) : MinecraftAdapter.ParseStatus(text);
             if (s == ServerStatus.Running) SetStatus(ServerStatus.Running);
+        }
+        if (type.IsOmniHost())
+        {
+            // The engine's own console is long and names the engine; show OMNIHost's short version.
+            if (OmniHostLog.Simplify(text) is { } shown) Push(stream, shown);
+            return;
         }
         Push(stream, text);
     }
@@ -343,6 +352,9 @@ public sealed class ServerRuntime
         SetStatus(ServerStatus.Stopping);
         if (_adoptedPid is not null && _record is { } rec)
         {
+            // OMNIHost has no RCON: ask it to save and stop with an interrupt (Unix); Windows has no clean equivalent, so it is ended.
+            if (rec.ServerType.IsOmniHost()) { if (!TryInterrupt(_adoptedPid.Value)) Kill(); }
+            else
             // A re-attached server only has RCON: send "stop" over it, THEN close our connection so the shutdown isn't held up.
             _ = Task.Run(async () =>
             {
@@ -375,6 +387,19 @@ public sealed class ServerRuntime
                 if (IsRunning && Pid == pid) Push(LogStream.System, $"Process {pid} is still there after a force-kill — end it in Task Manager (Details tab).");
             }
         });
+    }
+
+    /// <summary>SIGINT: Pumpkin saves the world and exits. False where that isn't possible (Windows).</summary>
+    static bool TryInterrupt(int pid)
+    {
+        if (OperatingSystem.IsWindows()) return false;
+        try
+        {
+            using var p = Process.Start(new ProcessStartInfo("kill", ["-INT", pid.ToString()]) { UseShellExecute = false, CreateNoWindow = true });
+            p?.WaitForExit(3000);
+            return p?.ExitCode == 0;
+        }
+        catch { return false; }
     }
 
     public void Kill()

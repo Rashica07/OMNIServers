@@ -25,7 +25,7 @@ public static class ServerSectionExt
     {
         if (s == ServerSection.Mods) return t.UsesModsFolder();
         if (s == ServerSection.Map) return BlueMapSupported(t);
-        if (!t.IsBedrock()) return true;
+        if (!t.IsBedrock() && !t.IsOmniHost()) return true;   // OMNIHost: no Minecraft-console features (players tab, chat, worlds, addons)
         return s is not (ServerSection.Players or ServerSection.Addons or ServerSection.Worlds or ServerSection.Chat);
     }
 
@@ -65,6 +65,16 @@ public sealed class ServerDetailViewModel : ViewModelBase
         CopyAddressCommand = new RelayCommand(() => { Dialogs.Current.CopyText(Address); ToastService.Shared.Show("Address copied", Address, "copy", "ok", null, 3); });
         JoinCommand = new RelayCommand(() =>
         {
+            // Java servers: hand over to OMNI Launcher, which opens straight onto the server.
+            if (!Server.Record.ServerType.IsBedrock() && OmniLauncherLink.CanPlay(Server.Record.McVersion))
+            {
+                var pub = TunnelManager.Shared.Status(Server.Record.Id) is { Running: true, Address: { Length: > 0 } a } ? a : null;
+                if (OmniLauncherLink.Play(Server.Record.Name, $"localhost:{ServerPort}", pub, Server.Record.McVersion!))
+                {
+                    ToastService.Shared.Show("Opening OMNI Launcher", "Pick an instance and press Play.", "play", "ok", null, 4);
+                    return;
+                }
+            }
             var plan = JoinLink.Plan(Server.Record.ServerType, Server.Record.Name, Address);
             if (!plan.Bedrock) Dialogs.Current.CopyText(plan.Address);
             var opened = JoinLink.Open(plan);
@@ -101,7 +111,8 @@ public sealed class ServerDetailViewModel : ViewModelBase
     public RelayCommand JoinCommand { get; }
 
     /// <summary>The address friends on this network type into Minecraft (the Network tab has tunnel and public options).</summary>
-    public string Address => LaunchInfo.Address(Net.LanIp(), Properties.Load(Server.Record.Path).GetInt("server-port", Server.Record.ServerType.IsBedrock() ? 19132 : 25565));
+    int ServerPort => Server.Record.ServerType.IsOmniHost() ? OmniHostAdapter.Port(Server.Record.Path) : Properties.Load(Server.Record.Path).GetInt("server-port", Server.Record.ServerType.IsBedrock() ? 19132 : 25565);
+    public string Address => LaunchInfo.Address(Net.LanIp(), ServerPort);
     public bool HasAddress => Server.IsRunning;
 
     public bool ShowLaunch => Server.Status is ServerStatus.Starting or ServerStatus.Running;

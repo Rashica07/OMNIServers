@@ -124,7 +124,7 @@ public static class BedrockNetwork
         }
         var xp = CrossplayManager.Status(dir, type);
         if (!xp.Geyser) return null;
-        var javaPort = Properties.Load(dir).GetInt("server-port", 25565);
+        var javaPort = type.IsOmniHost() ? Adapters.OmniHostAdapter.Port(dir) : Properties.Load(dir).GetInt("server-port", 25565);
         var rules = new List<PortRule> { new(PortProtocol.Tcp, javaPort, "Java game") };
         rules.AddRange(GeyserRules(xp.BedrockPort));
         return ("minecraft-geyser", rules);

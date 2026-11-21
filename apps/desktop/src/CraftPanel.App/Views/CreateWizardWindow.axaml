@@ -143,6 +143,7 @@
               <c:Field Label="Java" IsVisible="{Binding IsMinecraftServer}" Hint="Leave as-is — OMNIServers picks a matching Java, and installs one if you have none."><TextBox Text="{Binding Java, Mode=TwoWay}" Classes="mono" FontSize="12" /></c:Field>
             </StackPanel>
           </c:Card>
+          <Border Classes="banner warn" IsVisible="{Binding IsOmniHost}"><TextBlock Text="OMNIHost is experimental. Mobs, villagers and some other features are still being built, and Java mods don't run on it. A Java server can be moved to OMNIHost later and the original stays untouched. The engine (about 100 MB) is downloaded once, on first use." TextWrapping="Wrap" Classes="small" /></Border>
           <c:Card Title="Memory" Icon="memory" IsVisible="{Binding IsMinecraftServer}">
             <c:RamPicker RamMB="{Binding RamMB, Mode=TwoWay}" Players="{Binding Players, Mode=TwoWay}" Kind="{Binding RamKind}" Follow="{Binding Follow, Mode=TwoWay}" />
           </c:Card>

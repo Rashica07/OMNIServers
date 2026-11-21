@@ -118,7 +118,7 @@ public sealed class PortRulesViewModel : ViewModelBase
         var all = Rules.Select(r => r.ToRule()).ToList();
         Issues.Clear();
         foreach (var i in PortRules.Validate(all)) Issues.Add((i.Level == IssueLevel.Error ? "Fix: " : "Careful: ") + i.Message);
-        var own = Properties.Load(_server.Record.Path).GetInt("server-port", _server.Record.ServerType.IsBedrock() ? 19132 : 25565);
+        var own = _server.Record.ServerType.IsOmniHost() ? Core.Adapters.OmniHostAdapter.Port(_server.Record.Path) : Properties.Load(_server.Record.Path).GetInt("server-port", _server.Record.ServerType.IsBedrock() ? 19132 : 25565);
         var others = AppServices.Store.TakenPorts(); others.Remove(own);
         // the server's own port is only "in use" while it is running; skip the bind check for it then
         foreach (var i in PortRules.FindConflicts(all, others, (proto, port) => (_server.IsRunning && port == own) || Net.PortFreeFor(proto, port))) Issues.Add("Careful: " + i.Message);

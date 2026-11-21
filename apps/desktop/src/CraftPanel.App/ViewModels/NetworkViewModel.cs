@@ -19,7 +19,7 @@ public sealed class NetworkViewModel : ViewModelBase
     {
         _server = server;
         _tunnel = R.ManualTunnelAddress ?? "";
-        _port = Properties.Load(R.Path).GetInt("server-port", R.ServerType.IsBedrock() ? 19132 : 25565);
+        _port = R.ServerType.IsOmniHost() ? Core.Adapters.OmniHostAdapter.Port(R.Path) : Properties.Load(R.Path).GetInt("server-port", R.ServerType.IsBedrock() ? 19132 : 25565);
         CopyCommand = new RelayCommand(o => { if (o is string s && s.Length > 0) { Dialogs.Current.CopyText(s); ToastService.Shared.Show("Copied", s, "copy", "ok", null, 2); } });
         PublicIpCommand = new AsyncCommand(FetchPublicIpAsync);
         SaveTunnelCommand = new RelayCommand(SaveTunnel);

@@ -67,6 +67,7 @@ public sealed class CreateWizardViewModel : ViewModelBase
         new(Loader.NeoForge, "Modern Forge-family modding for big mod packs (1.20.2 and newer).", "layers", 3, mods: true),
         new(Loader.Forge, "The classic mod loader, best for older versions and packs.", "pickaxe", 3, mods: true),
         new(Loader.Bedrock, "Bedrock Edition: for phones, consoles and Windows 10/11 players. Runs on Windows and Linux.", "globe", 4),
+        new(Loader.Vanilla, "OMNIServers' own fast server: native, no Java, starts in a blink. Best for lobbies, creative and minigames. Experimental: mobs and some features are still being built, and Java mods don't run on it.", "zap", 5, game: ServerType.OmniHost, note: "Experimental"),
         new(Loader.Vanilla, "GTA V multiplayer (roleplay and more). Pick your own server files, or make a new one. Needs your free licence key from keymaster.fivem.net.", "swords", game: ServerType.FiveM, note: "Windows & Linux"),
         new(Loader.Vanilla, "The sandbox adventure. Pick an existing server, or make a new one that creates its own world.", "pickaxe", game: ServerType.Terraria, note: "Windows, Mac & Linux"),
     ];
@@ -189,7 +190,8 @@ public sealed class CreateWizardViewModel : ViewModelBase
     public double RamMB { get => _ram; set => Set(ref _ram, value); }
     public double Players { get => _players; set => Set(ref _players, value); }
     public bool Follow { get => _follow; set => Set(ref _follow, value); }
-    public bool ShowWorldSettings => !_isModpack && !_isTemplate && _game is null;
+    public bool ShowWorldSettings => !_isModpack && !_isTemplate && (_game is null || _game == ServerType.OmniHost);
+    public bool IsOmniHost => _game == ServerType.OmniHost;
 
     public RamKind RamKind => _isModpack ? RamKind.Modpack : _isTemplate ? (Template.IsMinigame ? RamKind.Minigame : RamKind.VanillaLike) : RamAdvisor.KindFor(_loader.ServerType());
     public bool CanCreate => Name.Trim().Length > 0 && Location.Length > 0;
@@ -250,7 +252,7 @@ public sealed class CreateWizardViewModel : ViewModelBase
         if (Name.Length == 0 && !_isModpack && !_isTemplate && _game is null) Name = $"My {_loader.Label()} Server";
         _locationEdited = false;
         Location = Path.Combine(BaseDir, FolderName());
-        Raise(nameof(RamKind)); Raise(nameof(ShowWorldSettings)); Raise(nameof(IsGameServer)); Raise(nameof(IsMinecraftServer));
+        Raise(nameof(RamKind)); Raise(nameof(ShowWorldSettings)); Raise(nameof(IsOmniHost)); Raise(nameof(IsGameServer)); Raise(nameof(IsMinecraftServer));
         Step = WizardStep.Details;
     }
 
@@ -311,7 +313,17 @@ public sealed class CreateWizardViewModel : ViewModelBase
         {
             Created created;
             var taken = AppServices.Store.TakenPorts();
-            if (_game is { } game)
+            if (_game == ServerType.OmniHost)
+            {
+                var port = Provisioner.PickFreePort(taken) ?? throw new ProvisionException("No free port was found near 25565. Close another server and try again.");
+                var settings = new PumpkinConfig.Settings
+                {
+                    Motd = Motd, Port = port, MaxPlayers = (int)MaxPlayers, Gamemode = Gamemode, Difficulty = Difficulty, Seed = Seed,
+                    // Offline sign-in is a Settings choice; new servers start with Mojang sign-in on.
+                };
+                created = await OmniHostCreator.CreateAsync(dir, settings, progress, _cts.Token);
+            }
+            else if (_game is { } game)
             {
                 created = await GameInstaller.CreateAsync(game, dir, name, progress, _cts.Token);
             }

@@ -43,15 +43,48 @@ public sealed class ServerSettingsViewModel : ViewModelBase
         DeleteFilesCommand = new AsyncCommand(DeleteFilesAsync);
         AcceptEulaCommand = new AsyncCommand(async () => { await File.WriteAllTextAsync(Path.Combine(R.Path, "eula.txt"), "# Accepted via OMNIServers — https://aka.ms/MinecraftEULA\neula=true\n"); ToastService.Shared.Show("EULA accepted", "", "check-circle", "ok"); });
         server.PropertyChanged += (_, e) => { if (e.PropertyName == nameof(ServerItemViewModel.IsRunning)) { Raise(nameof(Locked)); Raise(nameof(LockedNote)); Raise(nameof(CanEdit)); } };
+        MoveToOmniHostCommand = new AsyncCommand(MoveToOmniHostAsync, () => !Locked);
         RefreshRcon();
         _ = RefreshJavaAsync();
+    }
+
+    /// <summary>Copies this Java server onto OMNIHost as a new server. The Java server is never touched.</summary>
+    async Task MoveToOmniHostAsync()
+    {
+        OmniHostTransfer.Plan plan;
+        try { plan = OmniHostTransfer.MakePlan(R.Path, R.Name); }
+        catch (OmniHostTransfer.TransferException e) { ToastService.Shared.Error(e.Message); return; }
+        var msg = $"A copy of \"{R.Name}\" ({OmniHostTransfer.Format(plan.WorldBytes)} world, {plan.PlayerCount} player(s) with inventories, settings and lists) becomes a new OMNIHost server. " +
+                  $"{OmniHostTransfer.LeftBehindSummary(plan)}\n\nThe Java server is not changed and stays as your backup. Both use the same port, so run one at a time. " +
+                  $"The world is converted to OMNIHost's format (one way). It needs about {OmniHostTransfer.Format(OmniHostTransfer.RequiredFreeBytes(plan))} free.";
+        if (!await Dialogs.Current.ConfirmAsync($"Move {R.Name} to OMNIHost?", msg, "Move to OMNIHost")) return;
+        var parent = Path.GetDirectoryName(R.Path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)) ?? R.Path;
+        var dest = Path.Combine(parent, Path.GetFileName(R.Path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)) + " (OMNIHost)");
+        for (var i = 2; Directory.Exists(dest); i++) dest = Path.Combine(parent, Path.GetFileName(R.Path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)) + $" (OMNIHost {i})");
+        try
+        {
+            ToastService.Shared.Show("Moving to OMNIHost", "Downloading the engine if needed, then copying the world…", "zap", "info", null, 6);
+            var engine = await PumpkinEngine.EnsureInstalledAsync();
+            await OmniHostTransfer.PerformAsync(plan, dest);
+            var rec = new ServerRecord { Name = R.Name + " (OMNIHost)", Path = dest, ServerType = ServerType.OmniHost, LaunchTarget = engine, McVersion = PumpkinEngine.MinecraftVersion, JavaPath = "", RamMB = R.RamMB };
+            AppServices.Store.Add(rec);
+            ToastService.Shared.Show("Moved to OMNIHost", "Find it in your server list. A note about what stayed behind is in its folder.", "check-circle", "ok", null, 8);
+        }
+        catch (Exception e) { ToastService.Shared.Error(e.Message); }
     }
 
     public bool Locked => _server.IsRunning;
     public bool CanEdit => !Locked;
     public string LockedNote => Locked ? "Stop the server to change its Java, memory or port." : "";
     public bool IsBedrock => R.ServerType.IsBedrock();
-    public bool IsJava => !IsBedrock;
+    public bool IsOmniHost => R.ServerType.IsOmniHost();
+    public bool IsJava => !IsBedrock && !IsOmniHost;
+    public bool CanMoveToOmniHost => OmniHostTransfer.CanTransfer(R.ServerType) && !IsBedrock;
+    bool _omniOnline = true;
+    public bool OmniOnlineMode { get => _omniOnline; set { Edit(ref _omniOnline, value, nameof(OmniOnlineMode)); Raise(nameof(OmniOffline)); } }
+    public bool OmniOffline => !_omniOnline;
+    public bool HasOmniConfig => IsOmniHost && File.Exists(Path.Combine(R.Path, PumpkinConfig.FileName));
+    public AsyncCommand MoveToOmniHostCommand { get; private set; } = null!;
     public bool ExpertMode => AppServices.Settings.ExpertMode;
     public RamKind RamKind => RamAdvisor.KindFor(R.ServerType);
     public string LaunchTarget => R.LaunchTarget;
@@ -152,7 +185,13 @@ public sealed class ServerSettingsViewModel : ViewModelBase
     void LoadProperties()
     {
         _loading = true;
+        if (IsOmniHost && PumpkinConfig.Read(R.Path) is { } oe)
+        {
+            Motd = oe.Motd; MaxPlayers = oe.MaxPlayers; Difficulty = oe.Difficulty; Gamemode = oe.Gamemode; OmniOnlineMode = oe.OnlineMode;
+            Port = OmniHostAdapter.Port(R.Path);
+        }
         var p = Properties.Load(R.Path);
+        if (IsOmniHost) { _loading = false; Raise(nameof(HasProperties)); Raise(nameof(HasOmniConfig)); return; }
         Motd = p.GetOr(MotdKey, "");
         MaxPlayers = p.GetInt("max-players", 20);
         Port = p.GetInt("server-port", IsBedrock ? 19132 : 25565);
@@ -209,6 +248,11 @@ public sealed class ServerSettingsViewModel : ViewModelBase
             p.Save();
             RawProperties = File.ReadAllText(Path.Combine(R.Path, "server.properties"));
             Raise(nameof(RawProperties));
+        }
+        if (HasOmniConfig && !Locked)
+        {
+            try { PumpkinConfig.Apply(new PumpkinConfig.Editable(OmniOnlineMode, Motd, (int)MaxPlayers, Gamemode, Difficulty), R.Path); }
+            catch (Exception e) { ToastService.Shared.Error("Couldn't save the OMNIHost settings: " + e.Message); return; }
         }
         AppServices.Store.Update(R);
         _server.Refresh();

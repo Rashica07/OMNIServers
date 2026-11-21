@@ -47,5 +47,5 @@ public sealed class ServerStore
     public void Remove(Guid id) { lock (_gate) { _servers.RemoveAll(s => s.Id == id); Save(); } }
 
     /// <summary>Ports already used by known servers (server.properties), for picking a free one.</summary>
-    public HashSet<int> TakenPorts() => All.Select(s => Properties.Load(s.Path).GetInt("server-port", 25565)).ToHashSet();
+    public HashSet<int> TakenPorts() => All.Select(s => s.ServerType.IsOmniHost() ? Adapters.OmniHostAdapter.Port(s.Path) : Properties.Load(s.Path).GetInt("server-port", 25565)).ToHashSet();
 }

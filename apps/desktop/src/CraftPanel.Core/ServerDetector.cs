@@ -23,10 +23,10 @@ public static class ServerDetector
             if (mc.McVersion is null) warnings.Add("Couldn't determine the Minecraft version automatically — set it in the server's settings if Java looks mismatched.");
             return new(path, true, mc.ServerType, mc.LaunchTarget, mc.McVersion, mc.Evidence, java, warnings);
         }
-        if (File.Exists(Path.Combine(path, "omnihost.exe")) || File.Exists(Path.Combine(path, "omnihost")) || File.Exists(Path.Combine(path, "omnihost.toml")))
+        if (Adapters.OmniHostAdapter.IsServerFolder(path))
         {
-            var exe = File.Exists(Path.Combine(path, "omnihost.exe")) ? "omnihost.exe" : "omnihost";
-            return new(path, true, ServerType.OmniHost, exe, "1.21.x", [exe], null, []); // OMNIHost needs no Java
+            var engine = Adapters.PumpkinEngine.InstalledBinary() ?? "pumpkin";   // OMNIHost needs no Java
+            return new(path, true, ServerType.OmniHost, engine, Adapters.PumpkinEngine.MinecraftVersion, [Adapters.PumpkinConfig.FileName], null, []);
         }
 
         if (BedrockAdapter.Inspect(path) is { } bedrock)

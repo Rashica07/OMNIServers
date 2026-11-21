@@ -14,6 +14,7 @@ public abstract record LiveEvent
     public sealed record Broadcast(string From, string Text) : LiveEvent;
     public sealed record Advancement(string Player, string Title) : LiveEvent;
 
+    static readonly Regex ShortPrefix = new(@"^\[\d{2}:\d{2}:\d{2}\] ", RegexOptions.Compiled);
     static readonly Regex Ansi = new("\u001b\\[[0-9;]*m", RegexOptions.Compiled);
 
     /// <summary>
@@ -24,8 +25,10 @@ public abstract record LiveEvent
     {
         var line = Ansi.Replace(raw, "");
         var i = line.IndexOf("]: ", StringComparison.Ordinal);
-        if (i < 0) return null;
-        var rest = line[(i + 3)..].Trim();
+        string rest;
+        if (i >= 0) rest = line[(i + 3)..].Trim();
+        else if (ShortPrefix.Match(line) is { Success: true } sp) rest = line[sp.Length..].Trim();   // OMNIHost's short console format
+        else return null;
         if (rest.StartsWith("[Not Secure] ")) rest = rest["[Not Secure] ".Length..];
 
         if (rest.StartsWith('<') && rest.IndexOf('>') is var close and > 0)

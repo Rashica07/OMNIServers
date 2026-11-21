@@ -19,6 +19,26 @@
           </StackPanel>
         </c:Card>
 
+        <c:Card Title="OMNIHost" Icon="zap" IsVisible="{Binding HasOmniConfig}" Description="Saved to pumpkin.toml and used the next time the server starts.">
+          <StackPanel Spacing="14">
+            <c:SettingRow Title="Online mode (Mojang sign-in)"><ToggleSwitch IsChecked="{Binding OmniOnlineMode, Mode=TwoWay}" IsEnabled="{Binding CanEdit}" /></c:SettingRow>
+            <Border Classes="banner warn" IsVisible="{Binding OmniOffline}"><TextBlock Text="Offline mode: anyone can join with any name, including an operator's name. Use it only with people you trust." TextWrapping="Wrap" Classes="small" /></Border>
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+              <c:Field Label="Gamemode"><ComboBox ItemsSource="{x:Static vm:ServerSettingsViewModel.Gamemodes}" SelectedItem="{Binding Gamemode, Mode=TwoWay}" HorizontalAlignment="Stretch" IsEnabled="{Binding CanEdit}" /></c:Field>
+              <c:Field Grid.Column="1" Label="Difficulty"><ComboBox ItemsSource="{x:Static vm:ServerSettingsViewModel.Difficulties}" SelectedItem="{Binding Difficulty, Mode=TwoWay}" HorizontalAlignment="Stretch" IsEnabled="{Binding CanEdit}" /></c:Field>
+              <c:Field Grid.Column="2" Label="Max players"><NumericUpDown Value="{Binding MaxPlayers, Mode=TwoWay}" Minimum="1" Maximum="1000" FormatString="0" IsEnabled="{Binding CanEdit}" /></c:Field>
+            </Grid>
+            <c:Field Label="Message of the day" Hint="Shown in your friends' server list."><TextBox Text="{Binding Motd, Mode=TwoWay}" IsEnabled="{Binding CanEdit}" /></c:Field>
+          </StackPanel>
+        </c:Card>
+
+        <c:Card Title="OMNIHost" Icon="zap" IsVisible="{Binding CanMoveToOmniHost}" Description="Try this server on OMNIHost, the fast native engine (experimental).">
+          <StackPanel Spacing="10">
+            <TextBlock Text="Copies the world, players with their inventories, settings and lists into a new OMNIHost server. This server is not changed and stays as your backup. Mods and plugins don't run on OMNIHost and stay behind." TextWrapping="Wrap" Classes="dim small" />
+            <Button Classes="ghost" Content="Move to OMNIHost…" Command="{Binding MoveToOmniHostCommand}" HorizontalAlignment="Left" />
+          </StackPanel>
+        </c:Card>
+
         <c:Card Title="Memory" Icon="memory" IsVisible="{Binding IsJava}">
           <c:RamPicker RamMB="{Binding RamMB, Mode=TwoWay}" Kind="{Binding RamKind}" ShowPlayers="True" Follow="False" IsEnabled="{Binding CanEdit}" />
         </c:Card>
